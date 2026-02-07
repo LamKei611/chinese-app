@@ -677,147 +677,230 @@
         renderVocab();
         renderGrammar();
 
-        // Print Vocabulary to PDF
+        // Print Vocabulary
         function printVocabPDF() {
             if (vocabData.length === 0) {
                 alert('No vocabulary to print. Add some words first!');
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(44, 62, 80);
-            doc.text('My Chinese Vocabulary', 14, 20);
-
-            // Add date
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            const today = new Date().toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            doc.text(`Generated: ${today}`, 14, 28);
-
-            // Prepare table data
-            const tableData = vocabData.map(v => [
-                v.hanzi,
-                v.pinyin,
-                v.hanViet || '-',
-                v.meaning,
-                v.wordType
-            ]);
-
-            // Add table
-            doc.autoTable({
-                startY: 35,
-                head: [['Hanzi', 'Pinyin', 'Hán Việt', 'Meaning', 'Type']],
-                body: tableData,
-                theme: 'grid',
-                styles: {
-                    font: 'helvetica',
-                    fontSize: 10,
-                    cellPadding: 5,
-                },
-                headStyles: {
-                    fillColor: [44, 62, 80],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    halign: 'center'
-                },
-                columnStyles: {
-                    0: { cellWidth: 25, halign: 'center', fontSize: 14, fontStyle: 'bold' },
-                    1: { cellWidth: 30 },
-                    2: { cellWidth: 30 },
-                    3: { cellWidth: 60 },
-                    4: { cellWidth: 35, halign: 'center' }
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 247, 250]
-                }
-            });
-
-            // Add footer with total count
-            const finalY = doc.lastAutoTable.finalY + 10;
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Total words: ${vocabData.length}`, 14, finalY);
-
-            // Save the PDF
-            doc.save('chinese-vocabulary.pdf');
+            // Create a printable HTML page
+            const printWindow = window.open('', '', 'width=800,height=600');
+            
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>My Chinese Vocabulary</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                            max-width: 900px;
+                            margin: 0 auto;
+                        }
+                        h1 {
+                            color: #2c3e50;
+                            margin-bottom: 10px;
+                        }
+                        .date {
+                            color: #666;
+                            font-size: 14px;
+                            margin-bottom: 20px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                        }
+                        th {
+                            background-color: #2c3e50;
+                            color: white;
+                            padding: 12px;
+                            text-align: left;
+                            font-weight: bold;
+                        }
+                        td {
+                            border: 1px solid #ddd;
+                            padding: 10px;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f5f7fa;
+                        }
+                        .hanzi {
+                            font-size: 20px;
+                            font-weight: bold;
+                            text-align: center;
+                        }
+                        .type {
+                            text-align: center;
+                            font-size: 13px;
+                        }
+                        .footer {
+                            color: #666;
+                            font-size: 14px;
+                            margin-top: 20px;
+                        }
+                        @media print {
+                            body {
+                                padding: 10px;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>My Chinese Vocabulary</h1>
+                    <div class="date">Generated: ${new Date().toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Hanzi</th>
+                                <th style="width: 20%;">Pinyin</th>
+                                <th style="width: 20%;">Hán Việt</th>
+                                <th style="width: 30%;">Meaning</th>
+                                <th style="width: 15%;">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${vocabData.map(v => `
+                                <tr>
+                                    <td class="hanzi">${v.hanzi}</td>
+                                    <td>${v.pinyin}</td>
+                                    <td>${v.hanViet || '-'}</td>
+                                    <td>${v.meaning}</td>
+                                    <td class="type">${v.wordType}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="footer">Total words: ${vocabData.length}</div>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(html);
+            printWindow.document.close();
+            
+            // Wait for content to load, then print
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
         }
 
-        // Print Grammar to PDF
+        // Print Grammar
         function printGrammarPDF() {
             if (grammarData.length === 0) {
                 alert('No grammar notes to print. Add some patterns first!');
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(44, 62, 80);
-            doc.text('My Chinese Grammar Notes', 14, 20);
-
-            // Add date
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            const today = new Date().toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            doc.text(`Generated: ${today}`, 14, 28);
-
-            // Prepare table data
-            const tableData = grammarData.map(g => [
-                g.pattern,
-                g.examples.replace(/\n/g, ' | '),
-                g.notes || '-'
-            ]);
-
-            // Add table
-            doc.autoTable({
-                startY: 35,
-                head: [['Grammar Pattern', 'Examples', 'Notes']],
-                body: tableData,
-                theme: 'grid',
-                styles: {
-                    font: 'helvetica',
-                    fontSize: 9,
-                    cellPadding: 5,
-                    overflow: 'linebreak'
-                },
-                headStyles: {
-                    fillColor: [44, 62, 80],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    halign: 'center'
-                },
-                columnStyles: {
-                    0: { cellWidth: 45, fontStyle: 'bold', fontSize: 11 },
-                    1: { cellWidth: 75 },
-                    2: { cellWidth: 60 }
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 247, 250]
-                }
-            });
-
-            // Add footer with total count
-            const finalY = doc.lastAutoTable.finalY + 10;
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Total grammar patterns: ${grammarData.length}`, 14, finalY);
-
-            // Save the PDF
-            doc.save('chinese-grammar.pdf');
+            // Create a printable HTML page
+            const printWindow = window.open('', '', 'width=800,height=600');
+            
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>My Chinese Grammar Notes</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                            max-width: 900px;
+                            margin: 0 auto;
+                        }
+                        h1 {
+                            color: #2c3e50;
+                            margin-bottom: 10px;
+                        }
+                        .date {
+                            color: #666;
+                            font-size: 14px;
+                            margin-bottom: 20px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                        }
+                        th {
+                            background-color: #2c3e50;
+                            color: white;
+                            padding: 12px;
+                            text-align: left;
+                            font-weight: bold;
+                        }
+                        td {
+                            border: 1px solid #ddd;
+                            padding: 10px;
+                            vertical-align: top;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f5f7fa;
+                        }
+                        .pattern {
+                            font-size: 16px;
+                            font-weight: bold;
+                        }
+                        .examples {
+                            white-space: pre-line;
+                            line-height: 1.6;
+                        }
+                        .footer {
+                            color: #666;
+                            font-size: 14px;
+                            margin-top: 20px;
+                        }
+                        @media print {
+                            body {
+                                padding: 10px;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>My Chinese Grammar Notes</h1>
+                    <div class="date">Generated: ${new Date().toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Grammar Pattern</th>
+                                <th style="width: 45%;">Examples</th>
+                                <th style="width: 30%;">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${grammarData.map(g => `
+                                <tr>
+                                    <td class="pattern">${g.pattern}</td>
+                                    <td class="examples">${g.examples}</td>
+                                    <td>${g.notes || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="footer">Total grammar patterns: ${grammarData.length}</div>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(html);
+            printWindow.document.close();
+            
+            // Wait for content to load, then print
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
         }
     </script>
 </body>
