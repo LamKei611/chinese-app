@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Learning Notebook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-button {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #2c3e50;
+            border-color: white;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 3px rgba(44,62,80,0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(44,62,80,0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44,62,80,0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 8px 16px;
+            background: rgba(44,62,80,0.1);
+            color: #2c3e50;
+            border: 2px solid #2c3e50;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .sort-btn:hover {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .sort-btn.active {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .item-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .vocab-item, .grammar-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .vocab-item:hover, .grammar-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .vocab-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .hanzi {
+            font-size: 2.5em;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .vocab-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .pinyin {
+            color: #34495e;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .han-viet {
+            color: #555;
+            font-style: italic;
+        }
+
+        .meaning {
+            color: #333;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .word-type {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .grammar-item {
+            border-left: 4px solid #2c3e50;
+        }
+
+        .grammar-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .grammar-example {
+            background: rgba(255,255,255,0.6);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        .grammar-notes {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-direction: column;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .vocab-item {
+                grid-template-columns: 1fr;
+            }
+
+            .hanzi {
+                font-size: 2em;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chinese Learning Notebook</h1>
+        <p class="subtitle">Your friendly companion for vocabulary and grammar</p>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('vocab')">Vocabulary</button>
+            <button class="tab-button" onclick="switchTab('grammar')">Grammar</button>
+        </div>
+
+        <!-- Vocabulary Section -->
+        <div id="vocab" class="section active">
+            <div class="card">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">Add New Word</h2>
+                <form id="vocabForm" onsubmit="addVocab(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hanzi (汉字)</label>
+                            <input type="text" id="hanzi" required placeholder="例如: 你好">
+                        </div>
+                        <div class="form-group">
+                            <label>Pinyin</label>
+                            <input type="text" id="pinyin" required placeholder="nǐ hǎo">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hán Việt</label>
+                            <input type="text" id="hanViet" placeholder="nhĩ hảo">
+                        </div>
+                        <div class="form-group">
+                            <label>Type of Word</label>
+                            <input type="text" id="wordType" list="wordTypeOptions" required placeholder="Select or type your own...">
+                            <datalist id="wordTypeOptions">
+                                <option value="Noun (Danh từ)">
+                                <option value="Verb (Động từ)">
+                                <option value="Adjective (Tính từ)">
+                                <option value="Adverb (Trạng từ)">
+                                <option value="Phrase (Cụm từ)">
+                                <option value="Other (Khác)">
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Vietnamese Meaning</label>
+                        <input type="text" id="meaning" required placeholder="Xin chào">
+                    </div>
+                    <button type="submit">Add Word</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="controls">
+                    <h2 style="color: #2c3e50;">My Vocabulary</h2>
+                    <div class="sort-buttons">
+                        <button class="sort-btn" onclick="sortVocab('date')">By Date</button>
+                        <button class="sort-btn" onclick="sortVocab('hanzi')">By Hanzi</button>
+                        <button class="sort-btn" onclick="sortVocab('type')">By Type</button>
+                    </div>
+                </div>
+                <div id="vocabList" class="item-list"></div>
+            </div>
+        </div>
+
+        <!-- Grammar Section -->
+        <div id="grammar" class="section">
+            <div class="card">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">Add New Grammar</h2>
+                <form id="grammarForm" onsubmit="addGrammar(event)">
+                    <div class="form-group">
+                        <label>Grammar Pattern</label>
+                        <input type="text" id="grammarPattern" required placeholder="例如: 不是...而是...">
+                    </div>
+                    <div class="form-group">
+                        <label>Examples</label>
+                        <textarea id="grammarExamples" required placeholder="他不是老师，而是学生。&#10;Anh ấy không phải là giáo viên mà là học sinh."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="grammarNotes" placeholder="Usage notes, tips, and explanations..."></textarea>
+                    </div>
+                    <button type="submit">Add Grammar</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="controls">
+                    <h2 style="color: #2c3e50;">My Grammar Notes</h2>
+                    <div class="sort-buttons">
+                        <button class="sort-btn" onclick="sortGrammar('date')">By Date</button>
+                        <button class="sort-btn" onclick="sortGrammar('pattern')">By Pattern</button>
+                    </div>
+                </div>
+                <div id="grammarList" class="item-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data from localStorage
+        let vocabData = JSON.parse(localStorage.getItem('vocabData')) || [];
+        let grammarData = JSON.parse(localStorage.getItem('grammarData')) || [];
+        let editingVocabId = null;
+        let editingGrammarId = null;
+
+        // Switch between tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Add or edit vocabulary
+        function addVocab(event) {
+            event.preventDefault();
+            
+            const vocab = {
+                id: editingVocabId || Date.now(),
+                hanzi: document.getElementById('hanzi').value,
+                pinyin: document.getElementById('pinyin').value,
+                hanViet: document.getElementById('hanViet').value,
+                wordType: document.getElementById('wordType').value,
+                meaning: document.getElementById('meaning').value,
+                date: editingVocabId ? vocabData.find(v => v.id === editingVocabId).date : new Date().toISOString()
+            };
+
+            if (editingVocabId) {
+                const index = vocabData.findIndex(v => v.id === editingVocabId);
+                vocabData[index] = vocab;
+                editingVocabId = null;
+                document.querySelector('#vocabForm button[type="submit"]').textContent = 'Add Word';
+            } else {
+                vocabData.push(vocab);
+            }
+
+            localStorage.setItem('vocabData', JSON.stringify(vocabData));
+            
+            document.getElementById('vocabForm').reset();
+            renderVocab();
+        }
+
+        // Add or edit grammar
+        function addGrammar(event) {
+            event.preventDefault();
+            
+            const grammar = {
+                id: editingGrammarId || Date.now(),
+                pattern: document.getElementById('grammarPattern').value,
+                examples: document.getElementById('grammarExamples').value,
+                notes: document.getElementById('grammarNotes').value,
+                date: editingGrammarId ? grammarData.find(g => g.id === editingGrammarId).date : new Date().toISOString()
+            };
+
+            if (editingGrammarId) {
+                const index = grammarData.findIndex(g => g.id === editingGrammarId);
+                grammarData[index] = grammar;
+                editingGrammarId = null;
+                document.querySelector('#grammarForm button[type="submit"]').textContent = 'Add Grammar';
+            } else {
+                grammarData.push(grammar);
+            }
+
+            localStorage.setItem('grammarData', JSON.stringify(grammarData));
+            
+            document.getElementById('grammarForm').reset();
+            renderGrammar();
+        }
+
+        // Sort vocabulary
+        function sortVocab(by) {
+            document.querySelectorAll('#vocab .sort-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (by === 'date') {
+                vocabData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (by === 'hanzi') {
+                vocabData.sort((a, b) => a.hanzi.localeCompare(b.hanzi));
+            } else if (by === 'type') {
+                vocabData.sort((a, b) => a.wordType.localeCompare(b.wordType));
+            }
+            
+            renderVocab();
+        }
+
+        // Sort grammar
+        function sortGrammar(by) {
+            document.querySelectorAll('#grammar .sort-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (by === 'date') {
+                grammarData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (by === 'pattern') {
+                grammarData.sort((a, b) => a.pattern.localeCompare(b.pattern));
+            }
+            
+            renderGrammar();
+        }
+
+        // Edit vocabulary
+        function editVocab(id) {
+            const vocab = vocabData.find(v => v.id === id);
+            if (!vocab) return;
+
+            document.getElementById('hanzi').value = vocab.hanzi;
+            document.getElementById('pinyin').value = vocab.pinyin;
+            document.getElementById('hanViet').value = vocab.hanViet;
+            document.getElementById('wordType').value = vocab.wordType;
+            document.getElementById('meaning').value = vocab.meaning;
+
+            editingVocabId = id;
+            document.querySelector('#vocabForm button[type="submit"]').textContent = 'Update Word';
+            
+            // Scroll to form
+            document.getElementById('vocabForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Edit grammar
+        function editGrammar(id) {
+            const grammar = grammarData.find(g => g.id === id);
+            if (!grammar) return;
+
+            document.getElementById('grammarPattern').value = grammar.pattern;
+            document.getElementById('grammarExamples').value = grammar.examples;
+            document.getElementById('grammarNotes').value = grammar.notes;
+
+            editingGrammarId = id;
+            document.querySelector('#grammarForm button[type="submit"]').textContent = 'Update Grammar';
+            
+            // Scroll to form
+            document.getElementById('grammarForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Delete vocabulary
+        function deleteVocab(id) {
+            if (confirm('Are you sure you want to delete this word?')) {
+                vocabData = vocabData.filter(v => v.id !== id);
+                localStorage.setItem('vocabData', JSON.stringify(vocabData));
+                renderVocab();
+            }
+        }
+
+        // Delete grammar
+        function deleteGrammar(id) {
+            if (confirm('Are you sure you want to delete this grammar note?')) {
+                grammarData = grammarData.filter(g => g.id !== id);
+                localStorage.setItem('grammarData', JSON.stringify(grammarData));
+                renderGrammar();
+            }
+        }
+
+        // Render vocabulary list
+        function renderVocab() {
+            const list = document.getElementById('vocabList');
+            
+            if (vocabData.length === 0) {
+                list.innerHTML = '<div class="empty-state">No vocabulary yet. Add your first word!</div>';
+                return;
+            }
+
+            list.innerHTML = vocabData.map(v => `
+                <div class="vocab-item">
+                    <div class="hanzi">${v.hanzi}</div>
+                    <div class="vocab-details">
+                        <div class="pinyin">${v.pinyin}</div>
+                        ${v.hanViet ? `<div class="han-viet">Hán Việt: ${v.hanViet}</div>` : ''}
+                        <div class="meaning">${v.meaning}</div>
+                        <span class="word-type">${v.wordType}</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="edit-btn" onclick="editVocab(${v.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteVocab(${v.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render grammar list
+        function renderGrammar() {
+            const list = document.getElementById('grammarList');
+            
+            if (grammarData.length === 0) {
+                list.innerHTML = '<div class="empty-state">No grammar notes yet. Add your first pattern!</div>';
+                return;
+            }
+
+            list.innerHTML = grammarData.map(g => `
+                <div class="grammar-item">
+                    <div class="grammar-title">${g.pattern}</div>
+                    <div class="grammar-example">${g.examples.replace(/\n/g, '<br>')}</div>
+                    ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
+                    <div class="action-buttons" style="margin-top: 10px;">
+                        <button class="edit-btn" onclick="editGrammar(${g.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteGrammar(${g.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initial render
+        renderVocab();
+        renderGrammar();
+    </script>
+</body>
+</html>
