@@ -24,9 +24,14 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background: linear-gradient(135deg, #a8d5ba 0%, #7cb89d 100%); /* Default green for vocabulary */
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        body.grammar-active {
+            background: linear-gradient(135deg, #f5a9c1 0%, #e88ca7 100%); /* Pink for grammar */
         }
 
         .container {
@@ -54,6 +59,8 @@
             gap: 10px;
             margin-bottom: 20px;
             justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .tab-button {
@@ -204,7 +211,6 @@
         }
 
         .vocab-item, .grammar-item {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
@@ -217,8 +223,9 @@
         }
 
         .vocab-item {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); /* Pastel green */
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: auto auto 1fr auto;
             gap: 15px;
             align-items: start;
         }
@@ -263,7 +270,11 @@
         }
 
         .grammar-item {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); /* Pastel pink */
             border-left: 4px solid #2c3e50;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
         }
 
         .grammar-title {
@@ -341,6 +352,59 @@
             transform: scale(1.05);
         }
 
+        .select-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .select-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .item-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .selection-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .google-sheets-btn {
+            background: #0f9d58;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .google-sheets-btn:hover {
+            background: #0d8047;
+            transform: scale(1.05);
+        }
+
+        .sync-status {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -379,6 +443,8 @@
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('vocab')">Vocabulary</button>
             <button class="tab-button" onclick="switchTab('grammar')">Grammar</button>
+            <button class="google-sheets-btn" onclick="setupGoogleSheets()" style="margin-left: 20px;">Setup Sheets</button>
+            <button class="google-sheets-btn" onclick="syncFromGoogleSheets()" style="background: #4285f4;">Import from Sheets</button>
         </div>
 
         <!-- Vocabulary Section -->
@@ -429,8 +495,14 @@
                         <button class="sort-btn" onclick="sortVocab('date')">By Date</button>
                         <button class="sort-btn" onclick="sortVocab('hanzi')">By Hanzi</button>
                         <button class="sort-btn" onclick="sortVocab('type')">By Type</button>
-                        <button class="print-btn" onclick="printVocabPDF()">Print to PDF</button>
+                        <button class="print-btn" onclick="printVocabPDF()">Print Selected</button>
                     </div>
+                </div>
+                <div class="selection-controls">
+                    <input type="text" id="vocabSearch" placeholder="Search vocabulary..." onkeyup="searchVocab()" style="flex: 1; max-width: 300px;">
+                    <button class="select-btn" onclick="toggleSelectAllVocab()">Select All</button>
+                    <button class="select-btn" onclick="deselectAllVocab()">Deselect All</button>
+                    <span id="vocabSelectedCount" class="sync-status"></span>
                 </div>
                 <div id="vocabList" class="item-list"></div>
             </div>
@@ -463,8 +535,14 @@
                     <div class="sort-buttons">
                         <button class="sort-btn" onclick="sortGrammar('date')">By Date</button>
                         <button class="sort-btn" onclick="sortGrammar('pattern')">By Pattern</button>
-                        <button class="print-btn" onclick="printGrammarPDF()">Print to PDF</button>
+                        <button class="print-btn" onclick="printGrammarPDF()">Print Selected</button>
                     </div>
+                </div>
+                <div class="selection-controls">
+                    <input type="text" id="grammarSearch" placeholder="Search grammar..." onkeyup="searchGrammar()" style="flex: 1; max-width: 300px;">
+                    <button class="select-btn" onclick="toggleSelectAllGrammar()">Select All</button>
+                    <button class="select-btn" onclick="deselectAllGrammar()">Deselect All</button>
+                    <span id="grammarSelectedCount" class="sync-status"></span>
                 </div>
                 <div id="grammarList" class="item-list"></div>
             </div>
@@ -477,6 +555,8 @@
         let grammarData = JSON.parse(localStorage.getItem('grammarData')) || [];
         let editingVocabId = null;
         let editingGrammarId = null;
+        let googleSheetsUrl = localStorage.getItem('googleSheetsUrl') || null;
+        let googleSheetId = localStorage.getItem('googleSheetId') || null;
 
         // Switch between tabs
         function switchTab(tab) {
@@ -485,6 +565,13 @@
             
             document.getElementById(tab).classList.add('active');
             event.target.classList.add('active');
+            
+            // Change background color based on active tab
+            if (tab === 'grammar') {
+                document.body.classList.add('grammar-active');
+            } else {
+                document.body.classList.remove('grammar-active');
+            }
         }
 
         // Add or edit vocabulary
@@ -514,6 +601,11 @@
             
             document.getElementById('vocabForm').reset();
             renderVocab();
+            
+            // Auto-sync to Google Sheets
+            if (googleSheetsUrl) {
+                syncToGoogleSheets();
+            }
         }
 
         // Add or edit grammar
@@ -541,6 +633,11 @@
             
             document.getElementById('grammarForm').reset();
             renderGrammar();
+            
+            // Auto-sync to Google Sheets
+            if (googleSheetsUrl) {
+                syncToGoogleSheets();
+            }
         }
 
         // Sort vocabulary
@@ -631,11 +728,13 @@
             
             if (vocabData.length === 0) {
                 list.innerHTML = '<div class="empty-state">No vocabulary yet. Add your first word!</div>';
+                document.getElementById('vocabSelectedCount').textContent = '';
                 return;
             }
 
             list.innerHTML = vocabData.map(v => `
                 <div class="vocab-item">
+                    <input type="checkbox" class="item-checkbox vocab-checkbox" data-id="${v.id}" onchange="updateVocabCount()">
                     <div class="hanzi">${v.hanzi}</div>
                     <div class="vocab-details">
                         <div class="pinyin">${v.pinyin}</div>
@@ -649,6 +748,7 @@
                     </div>
                 </div>
             `).join('');
+            updateVocabCount();
         }
 
         // Render grammar list
@@ -657,32 +757,110 @@
             
             if (grammarData.length === 0) {
                 list.innerHTML = '<div class="empty-state">No grammar notes yet. Add your first pattern!</div>';
+                document.getElementById('grammarSelectedCount').textContent = '';
                 return;
             }
 
             list.innerHTML = grammarData.map(g => `
                 <div class="grammar-item">
-                    <div class="grammar-title">${g.pattern}</div>
-                    <div class="grammar-example">${g.examples.replace(/\n/g, '<br>')}</div>
-                    ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
+                    <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()">
+                    <div style="flex: 1;">
+                        <div class="grammar-title">${g.pattern}</div>
+                        <div class="grammar-example">${g.examples.replace(/\n/g, '<br>')}</div>
+                        ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
+                    </div>
                     <div class="action-buttons" style="margin-top: 10px;">
                         <button class="edit-btn" onclick="editGrammar(${g.id})">Edit</button>
                         <button class="delete-btn" onclick="deleteGrammar(${g.id})">Delete</button>
                     </div>
                 </div>
             `).join('');
+            updateGrammarCount();
         }
 
         // Initial render
         renderVocab();
         renderGrammar();
 
-        // Print Vocabulary
+        // Selection functions
+        function toggleSelectAllVocab() {
+            const checkboxes = document.querySelectorAll('.vocab-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            updateVocabCount();
+        }
+
+        function deselectAllVocab() {
+            document.querySelectorAll('.vocab-checkbox').forEach(cb => cb.checked = false);
+            updateVocabCount();
+        }
+
+        function toggleSelectAllGrammar() {
+            const checkboxes = document.querySelectorAll('.grammar-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            updateGrammarCount();
+        }
+
+        function deselectAllGrammar() {
+            document.querySelectorAll('.grammar-checkbox').forEach(cb => cb.checked = false);
+            updateGrammarCount();
+        }
+
+        function updateVocabCount() {
+            const selected = document.querySelectorAll('.vocab-checkbox:checked').length;
+            const total = vocabData.length;
+            document.getElementById('vocabSelectedCount').textContent = 
+                selected > 0 ? `${selected} of ${total} selected` : '';
+        }
+
+        function updateGrammarCount() {
+            const selected = document.querySelectorAll('.grammar-checkbox:checked').length;
+            const total = grammarData.length;
+            document.getElementById('grammarSelectedCount').textContent = 
+                selected > 0 ? `${selected} of ${total} selected` : '';
+        }
+
+        // Search functions
+        function searchVocab() {
+            const searchTerm = document.getElementById('vocabSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.vocab-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'grid';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function searchGrammar() {
+            const searchTerm = document.getElementById('grammarSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.grammar-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Print Vocabulary (only selected)
         function printVocabPDF() {
-            if (vocabData.length === 0) {
-                alert('No vocabulary to print. Add some words first!');
+            const selectedCheckboxes = document.querySelectorAll('.vocab-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select at least one word to print!');
                 return;
             }
+
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.id));
+            const selectedVocab = vocabData.filter(v => selectedIds.includes(v.id));
 
             // Create a printable HTML page
             const printWindow = window.open('', '', 'width=800,height=600');
@@ -767,7 +945,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${vocabData.map(v => `
+                            ${selectedVocab.map(v => `
                                 <tr>
                                     <td class="hanzi">${v.hanzi}</td>
                                     <td>${v.pinyin}</td>
@@ -778,7 +956,7 @@
                             `).join('')}
                         </tbody>
                     </table>
-                    <div class="footer">Total words: ${vocabData.length}</div>
+                    <div class="footer">Total words: ${selectedVocab.length}</div>
                 </body>
                 </html>
             `;
@@ -786,18 +964,22 @@
             printWindow.document.write(html);
             printWindow.document.close();
             
-            // Wait for content to load, then print
             setTimeout(() => {
                 printWindow.print();
             }, 250);
         }
 
-        // Print Grammar
+        // Print Grammar (only selected)
         function printGrammarPDF() {
-            if (grammarData.length === 0) {
-                alert('No grammar notes to print. Add some patterns first!');
+            const selectedCheckboxes = document.querySelectorAll('.grammar-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select at least one grammar pattern to print!');
                 return;
             }
+
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.id));
+            const selectedGrammar = grammarData.filter(g => selectedIds.includes(g.id));
 
             // Create a printable HTML page
             const printWindow = window.open('', '', 'width=800,height=600');
@@ -880,7 +1062,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${grammarData.map(g => `
+                            ${selectedGrammar.map(g => `
                                 <tr>
                                     <td class="pattern">${g.pattern}</td>
                                     <td class="examples">${g.examples}</td>
@@ -889,7 +1071,7 @@
                             `).join('')}
                         </tbody>
                     </table>
-                    <div class="footer">Total grammar patterns: ${grammarData.length}</div>
+                    <div class="footer">Total grammar patterns: ${selectedGrammar.length}</div>
                 </body>
                 </html>
             `;
@@ -897,10 +1079,207 @@
             printWindow.document.write(html);
             printWindow.document.close();
             
-            // Wait for content to load, then print
             setTimeout(() => {
                 printWindow.print();
             }, 250);
+        }
+
+        // Google Sheets Integration
+        function setupGoogleSheets() {
+            const instructions = `
+To sync with Google Sheets (TWO-WAY SYNC):
+
+1. Create a new Google Sheet
+2. Go to Extensions → Apps Script
+3. Delete any code and paste the NEW code (see next step)
+4. Deploy as Web App
+5. Copy BOTH the Web App URL AND your Google Sheet URL
+
+The app will show you the code to paste in the next step.
+
+Ready to continue?`;
+
+            if (!confirm(instructions)) return;
+
+            const code = `function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  if (data.type === 'vocab') {
+    var vocabSheet = sheet.getSheetByName('Vocabulary') || sheet.insertSheet('Vocabulary');
+    vocabSheet.clear();
+    vocabSheet.appendRow(['Hanzi', 'Pinyin', 'Hán Việt', 'Meaning', 'Type', 'Date']);
+    data.items.forEach(item => {
+      vocabSheet.appendRow([item.hanzi, item.pinyin, item.hanViet, item.meaning, item.wordType, item.date]);
+    });
+  } else if (data.type === 'grammar') {
+    var grammarSheet = sheet.getSheetByName('Grammar') || sheet.insertSheet('Grammar');
+    grammarSheet.clear();
+    grammarSheet.appendRow(['Pattern', 'Examples', 'Notes', 'Date']);
+    data.items.forEach(item => {
+      grammarSheet.appendRow([item.pattern, item.examples, item.notes, item.date]);
+    });
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({success: true}));
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var result = {};
+  
+  // Get vocabulary
+  var vocabSheet = sheet.getSheetByName('Vocabulary');
+  if (vocabSheet) {
+    var vocabData = vocabSheet.getDataRange().getValues();
+    result.vocab = vocabData.slice(1).map(row => ({
+      hanzi: row[0],
+      pinyin: row[1],
+      hanViet: row[2],
+      meaning: row[3],
+      wordType: row[4],
+      date: row[5]
+    }));
+  }
+  
+  // Get grammar
+  var grammarSheet = sheet.getSheetByName('Grammar');
+  if (grammarSheet) {
+    var grammarData = grammarSheet.getDataRange().getValues();
+    result.grammar = grammarData.slice(1).map(row => ({
+      pattern: row[0],
+      examples: row[1],
+      notes: row[2],
+      date: row[3]
+    }));
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+            alert('Copy this code to paste into Apps Script:\n\n' + code);
+
+            const url = prompt('Step 1: Paste your Web App URL here:');
+            if (!url) return;
+
+            const sheetUrl = prompt('Step 2: Paste your Google Sheet URL here (e.g., https://docs.google.com/spreadsheets/d/ABC123...)');
+            if (!sheetUrl) return;
+
+            // Extract sheet ID from URL
+            const match = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (match) {
+                googleSheetId = match[1];
+                googleSheetsUrl = url;
+                localStorage.setItem('googleSheetsUrl', url);
+                localStorage.setItem('googleSheetId', googleSheetId);
+                alert('Google Sheets connected! You can now sync both ways:\n• App → Sheets (automatic)\n• Sheets → App (click "Import from Sheets")');
+                syncToGoogleSheets();
+            } else {
+                alert('Invalid Google Sheet URL. Please try again.');
+            }
+        }
+
+        async function syncToGoogleSheets() {
+            if (!googleSheetsUrl) return;
+
+            try {
+                // Sync vocabulary
+                await fetch(googleSheetsUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'vocab',
+                        items: vocabData
+                    })
+                });
+
+                // Sync grammar
+                await fetch(googleSheetsUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'grammar',
+                        items: grammarData
+                    })
+                });
+
+                console.log('Synced to Google Sheets');
+            } catch (error) {
+                console.error('Sync error:', error);
+            }
+        }
+
+        // Import data FROM Google Sheets
+        async function syncFromGoogleSheets() {
+            if (!googleSheetsUrl) {
+                alert('Please setup Google Sheets connection first!');
+                return;
+            }
+
+            if (!confirm('This will import data from Google Sheets and merge with your current data. Continue?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(googleSheetsUrl);
+                const data = await response.json();
+
+                // Import vocabulary
+                if (data.vocab && data.vocab.length > 0) {
+                    data.vocab.forEach(item => {
+                        // Check if item already exists by matching hanzi and pinyin
+                        const exists = vocabData.find(v => 
+                            v.hanzi === item.hanzi && v.pinyin === item.pinyin
+                        );
+                        
+                        if (!exists) {
+                            // Add new item with unique ID
+                            vocabData.push({
+                                id: Date.now() + Math.random(),
+                                hanzi: item.hanzi,
+                                pinyin: item.pinyin,
+                                hanViet: item.hanViet || '',
+                                meaning: item.meaning,
+                                wordType: item.wordType,
+                                date: item.date || new Date().toISOString()
+                            });
+                        }
+                    });
+                }
+
+                // Import grammar
+                if (data.grammar && data.grammar.length > 0) {
+                    data.grammar.forEach(item => {
+                        // Check if item already exists by pattern
+                        const exists = grammarData.find(g => 
+                            g.pattern === item.pattern
+                        );
+                        
+                        if (!exists) {
+                            // Add new item with unique ID
+                            grammarData.push({
+                                id: Date.now() + Math.random(),
+                                pattern: item.pattern,
+                                examples: item.examples,
+                                notes: item.notes || '',
+                                date: item.date || new Date().toISOString()
+                            });
+                        }
+                    });
+                }
+
+                // Save to localStorage
+                localStorage.setItem('vocabData', JSON.stringify(vocabData));
+                localStorage.setItem('grammarData', JSON.stringify(grammarData));
+
+                // Re-render
+                renderVocab();
+                renderGrammar();
+
+                alert('Successfully imported from Google Sheets!');
+            } catch (error) {
+                console.error('Import error:', error);
+                alert('Error importing from Google Sheets. Make sure:\n1. You deployed the script with doGet() function\n2. Access is set to "Anyone"\n3. The URL is correct');
+            }
         }
     </script>
 </body>
