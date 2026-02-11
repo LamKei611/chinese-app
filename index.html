@@ -298,7 +298,7 @@
         }
 
         .delete-btn {
-            background: #e74c3c;
+            background: #95a5a6;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -309,12 +309,12 @@
         }
 
         .delete-btn:hover {
-            background: #c0392b;
+            background: #7f8c8d;
             transform: scale(1.05);
         }
 
         .edit-btn {
-            background: #3498db;
+            background: #95a5a6;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -325,7 +325,7 @@
         }
 
         .edit-btn:hover {
-            background: #2980b9;
+            background: #7f8c8d;
             transform: scale(1.05);
         }
 
@@ -336,7 +336,7 @@
         }
 
         .print-btn {
-            background: #27ae60;
+            background: #95a5a6;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -348,12 +348,12 @@
         }
 
         .print-btn:hover {
-            background: #229954;
+            background: #7f8c8d;
             transform: scale(1.05);
         }
 
         .select-btn {
-            background: #3498db;
+            background: #95a5a6;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -364,7 +364,7 @@
         }
 
         .select-btn:hover {
-            background: #2980b9;
+            background: #7f8c8d;
             transform: scale(1.05);
         }
 
@@ -383,7 +383,7 @@
         }
 
         .google-sheets-btn {
-            background: #0f9d58;
+            background: #95a5a6;
             color: white;
             border: none;
             padding: 10px 18px;
@@ -395,7 +395,7 @@
         }
 
         .google-sheets-btn:hover {
-            background: #0d8047;
+            background: #7f8c8d;
             transform: scale(1.05);
         }
 
@@ -444,7 +444,7 @@
             <button class="tab-button active" onclick="switchTab('vocab')">Vocabulary</button>
             <button class="tab-button" onclick="switchTab('grammar')">Grammar</button>
             <button class="google-sheets-btn" onclick="setupGoogleSheets()" style="margin-left: 20px;">Setup Sheets</button>
-            <button class="google-sheets-btn" onclick="syncFromGoogleSheets()" style="background: #4285f4;">Import from Sheets</button>
+            <button class="google-sheets-btn" onclick="syncFromGoogleSheets()">Import from Sheets</button>
         </div>
 
         <!-- Vocabulary Section -->
@@ -495,7 +495,7 @@
                         <button class="sort-btn" onclick="sortVocab('date')">By Date</button>
                         <button class="sort-btn" onclick="sortVocab('hanzi')">By Hanzi</button>
                         <button class="sort-btn" onclick="sortVocab('type')">By Type</button>
-                        <button class="print-btn" onclick="printVocabPDF()">Print Selected</button>
+                        <button class="print-btn" onclick="printVocabPDF()" title="Print Selected">🖨️ Print</button>
                     </div>
                 </div>
                 <div class="selection-controls">
@@ -535,7 +535,7 @@
                     <div class="sort-buttons">
                         <button class="sort-btn" onclick="sortGrammar('date')">By Date</button>
                         <button class="sort-btn" onclick="sortGrammar('pattern')">By Pattern</button>
-                        <button class="print-btn" onclick="printGrammarPDF()">Print Selected</button>
+                        <button class="print-btn" onclick="printGrammarPDF()" title="Print Selected">🖨️ Print</button>
                     </div>
                 </div>
                 <div class="selection-controls">
@@ -710,6 +710,11 @@
                 vocabData = vocabData.filter(v => v.id !== id);
                 localStorage.setItem('vocabData', JSON.stringify(vocabData));
                 renderVocab();
+                
+                // Sync to Google Sheets
+                if (googleSheetsUrl) {
+                    syncToGoogleSheets();
+                }
             }
         }
 
@@ -719,6 +724,11 @@
                 grammarData = grammarData.filter(g => g.id !== id);
                 localStorage.setItem('grammarData', JSON.stringify(grammarData));
                 renderGrammar();
+                
+                // Sync to Google Sheets
+                if (googleSheetsUrl) {
+                    syncToGoogleSheets();
+                }
             }
         }
 
@@ -743,8 +753,8 @@
                         <span class="word-type">${v.wordType}</span>
                     </div>
                     <div class="action-buttons">
-                        <button class="edit-btn" onclick="editVocab(${v.id})">Edit</button>
-                        <button class="delete-btn" onclick="deleteVocab(${v.id})">Delete</button>
+                        <button class="edit-btn" onclick="editVocab(${v.id})" title="Edit">✏️</button>
+                        <button class="delete-btn" onclick="deleteVocab(${v.id})" title="Delete">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -770,8 +780,8 @@
                         ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
                     </div>
                     <div class="action-buttons" style="margin-top: 10px;">
-                        <button class="edit-btn" onclick="editGrammar(${g.id})">Edit</button>
-                        <button class="delete-btn" onclick="deleteGrammar(${g.id})">Delete</button>
+                        <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">✏️</button>
+                        <button class="delete-btn" onclick="deleteGrammar(${g.id})" title="Delete">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -781,6 +791,11 @@
         // Initial render
         renderVocab();
         renderGrammar();
+        
+        // Auto-sync from Google Sheets on load (for cross-device sync)
+        if (googleSheetsUrl) {
+            syncFromGoogleSheetsSilent();
+        }
 
         // Selection functions
         function toggleSelectAllVocab() {
@@ -851,7 +866,12 @@
         }
 
         // Print Vocabulary (only selected)
-        function printVocabPDF() {
+        async function printVocabPDF() {
+            // First, try to sync from Google Sheets to get latest data
+            if (googleSheetsUrl) {
+                await syncFromGoogleSheetsSilent();
+            }
+            
             const selectedCheckboxes = document.querySelectorAll('.vocab-checkbox:checked');
             
             if (selectedCheckboxes.length === 0) {
@@ -970,7 +990,12 @@
         }
 
         // Print Grammar (only selected)
-        function printGrammarPDF() {
+        async function printGrammarPDF() {
+            // First, try to sync from Google Sheets to get latest data
+            if (googleSheetsUrl) {
+                await syncFromGoogleSheetsSilent();
+            }
+            
             const selectedCheckboxes = document.querySelectorAll('.grammar-checkbox:checked');
             
             if (selectedCheckboxes.length === 0) {
@@ -1223,15 +1248,18 @@ function doGet(e) {
                 const response = await fetch(googleSheetsUrl);
                 const data = await response.json();
 
+                let importedVocab = 0;
+                let importedGrammar = 0;
+
                 // Import vocabulary
                 if (data.vocab && data.vocab.length > 0) {
                     data.vocab.forEach(item => {
                         // Check if item already exists by matching hanzi and pinyin
-                        const exists = vocabData.find(v => 
+                        const existingIndex = vocabData.findIndex(v => 
                             v.hanzi === item.hanzi && v.pinyin === item.pinyin
                         );
                         
-                        if (!exists) {
+                        if (existingIndex === -1) {
                             // Add new item with unique ID
                             vocabData.push({
                                 id: Date.now() + Math.random(),
@@ -1242,6 +1270,15 @@ function doGet(e) {
                                 wordType: item.wordType,
                                 date: item.date || new Date().toISOString()
                             });
+                            importedVocab++;
+                        } else {
+                            // Update existing item
+                            vocabData[existingIndex] = {
+                                ...vocabData[existingIndex],
+                                hanViet: item.hanViet || vocabData[existingIndex].hanViet,
+                                meaning: item.meaning,
+                                wordType: item.wordType
+                            };
                         }
                     });
                 }
@@ -1250,11 +1287,11 @@ function doGet(e) {
                 if (data.grammar && data.grammar.length > 0) {
                     data.grammar.forEach(item => {
                         // Check if item already exists by pattern
-                        const exists = grammarData.find(g => 
+                        const existingIndex = grammarData.findIndex(g => 
                             g.pattern === item.pattern
                         );
                         
-                        if (!exists) {
+                        if (existingIndex === -1) {
                             // Add new item with unique ID
                             grammarData.push({
                                 id: Date.now() + Math.random(),
@@ -1263,6 +1300,14 @@ function doGet(e) {
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
                             });
+                            importedGrammar++;
+                        } else {
+                            // Update existing item
+                            grammarData[existingIndex] = {
+                                ...grammarData[existingIndex],
+                                examples: item.examples,
+                                notes: item.notes || grammarData[existingIndex].notes
+                            };
                         }
                     });
                 }
@@ -1275,10 +1320,80 @@ function doGet(e) {
                 renderVocab();
                 renderGrammar();
 
-                alert('Successfully imported from Google Sheets!');
+                alert(`Successfully imported!\nNew vocabulary: ${importedVocab}\nNew grammar: ${importedGrammar}`);
             } catch (error) {
                 console.error('Import error:', error);
                 alert('Error importing from Google Sheets. Make sure:\n1. You deployed the script with doGet() function\n2. Access is set to "Anyone"\n3. The URL is correct');
+            }
+        }
+
+        // Silent sync (no alerts) for use before printing
+        async function syncFromGoogleSheetsSilent() {
+            if (!googleSheetsUrl) return;
+
+            try {
+                const response = await fetch(googleSheetsUrl);
+                const data = await response.json();
+
+                // Import vocabulary
+                if (data.vocab && data.vocab.length > 0) {
+                    data.vocab.forEach(item => {
+                        const existingIndex = vocabData.findIndex(v => 
+                            v.hanzi === item.hanzi && v.pinyin === item.pinyin
+                        );
+                        
+                        if (existingIndex === -1) {
+                            vocabData.push({
+                                id: Date.now() + Math.random(),
+                                hanzi: item.hanzi,
+                                pinyin: item.pinyin,
+                                hanViet: item.hanViet || '',
+                                meaning: item.meaning,
+                                wordType: item.wordType,
+                                date: item.date || new Date().toISOString()
+                            });
+                        } else {
+                            vocabData[existingIndex] = {
+                                ...vocabData[existingIndex],
+                                hanViet: item.hanViet || vocabData[existingIndex].hanViet,
+                                meaning: item.meaning,
+                                wordType: item.wordType
+                            };
+                        }
+                    });
+                }
+
+                // Import grammar
+                if (data.grammar && data.grammar.length > 0) {
+                    data.grammar.forEach(item => {
+                        const existingIndex = grammarData.findIndex(g => 
+                            g.pattern === item.pattern
+                        );
+                        
+                        if (existingIndex === -1) {
+                            grammarData.push({
+                                id: Date.now() + Math.random(),
+                                pattern: item.pattern,
+                                examples: item.examples,
+                                notes: item.notes || '',
+                                date: item.date || new Date().toISOString()
+                            });
+                        } else {
+                            grammarData[existingIndex] = {
+                                ...grammarData[existingIndex],
+                                examples: item.examples,
+                                notes: item.notes || grammarData[existingIndex].notes
+                            };
+                        }
+                    });
+                }
+
+                localStorage.setItem('vocabData', JSON.stringify(vocabData));
+                localStorage.setItem('grammarData', JSON.stringify(grammarData));
+                renderVocab();
+                renderGrammar();
+            } catch (error) {
+                console.error('Silent sync error:', error);
             }
         }
     </script>
