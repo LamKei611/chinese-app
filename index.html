@@ -284,6 +284,12 @@
             font-weight: 600;
         }
 
+        .grammar-notes {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
         .grammar-example {
             background: rgba(255,255,255,0.6);
             padding: 12px;
@@ -292,9 +298,32 @@
             font-style: italic;
         }
 
-        .grammar-notes {
-            color: #555;
-            line-height: 1.6;
+        .grammar-content {
+            max-height: 80px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .grammar-content.expanded {
+            max-height: 1000px;
+        }
+
+        .show-more-btn {
+            background: transparent;
+            color: #2c3e50;
+            border: 1px solid #2c3e50;
+            padding: 6px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .show-more-btn:hover {
+            background: #2c3e50;
+            color: white;
         }
 
         .delete-btn {
@@ -815,8 +844,13 @@
                     <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()">
                     <div style="flex: 1;">
                         <div class="grammar-title">${g.pattern}</div>
-                        <div class="grammar-example">${g.examples.replace(/\n/g, '<br>')}</div>
-                        ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
+                        <div class="grammar-content" id="grammar-content-${g.id}">
+                            ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
+                            <div class="grammar-example"><strong>Examples:</strong><br>${g.examples.replace(/\n/g, '<br>')}</div>
+                        </div>
+                        <button class="show-more-btn" onclick="toggleGrammarContent(${g.id})" id="toggle-btn-${g.id}">
+                            Show More ▼
+                        </button>
                     </div>
                     <div class="action-buttons" style="margin-top: 10px;">
                         <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">
@@ -910,6 +944,20 @@
                     item.style.display = 'none';
                 }
             });
+        }
+
+        // Toggle grammar content expansion
+        function toggleGrammarContent(id) {
+            const content = document.getElementById(`grammar-content-${id}`);
+            const button = document.getElementById(`toggle-btn-${id}`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                button.textContent = 'Show More ▼';
+            } else {
+                content.classList.add('expanded');
+                button.textContent = 'Show Less ▲';
+            }
         }
 
         // Print Vocabulary (only selected)
