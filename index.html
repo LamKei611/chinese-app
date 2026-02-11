@@ -301,11 +301,14 @@
             background: #95a5a6;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .delete-btn:hover {
@@ -317,11 +320,14 @@
             background: #95a5a6;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .edit-btn:hover {
@@ -345,11 +351,26 @@
             font-size: 0.95em;
             transition: all 0.3s;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .print-btn:hover {
             background: #7f8c8d;
             transform: scale(1.05);
+        }
+
+        .btn-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .print-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
         }
 
         .select-btn {
@@ -495,7 +516,12 @@
                         <button class="sort-btn" onclick="sortVocab('date')">By Date</button>
                         <button class="sort-btn" onclick="sortVocab('hanzi')">By Hanzi</button>
                         <button class="sort-btn" onclick="sortVocab('type')">By Type</button>
-                        <button class="print-btn" onclick="printVocabPDF()" title="Print Selected">🖨️ Print</button>
+                        <button class="print-btn" onclick="printVocabPDF()" title="Print Selected">
+                            <svg class="print-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                            </svg>
+                            Print
+                        </button>
                     </div>
                 </div>
                 <div class="selection-controls">
@@ -535,7 +561,12 @@
                     <div class="sort-buttons">
                         <button class="sort-btn" onclick="sortGrammar('date')">By Date</button>
                         <button class="sort-btn" onclick="sortGrammar('pattern')">By Pattern</button>
-                        <button class="print-btn" onclick="printGrammarPDF()" title="Print Selected">🖨️ Print</button>
+                        <button class="print-btn" onclick="printGrammarPDF()" title="Print Selected">
+                            <svg class="print-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                            </svg>
+                            Print
+                        </button>
                     </div>
                 </div>
                 <div class="selection-controls">
@@ -753,8 +784,16 @@
                         <span class="word-type">${v.wordType}</span>
                     </div>
                     <div class="action-buttons">
-                        <button class="edit-btn" onclick="editVocab(${v.id})" title="Edit">✏️</button>
-                        <button class="delete-btn" onclick="deleteVocab(${v.id})" title="Delete">🗑️</button>
+                        <button class="edit-btn" onclick="editVocab(${v.id})" title="Edit">
+                            <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                        <button class="delete-btn" onclick="deleteVocab(${v.id})" title="Delete">
+                            <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -780,8 +819,16 @@
                         ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
                     </div>
                     <div class="action-buttons" style="margin-top: 10px;">
-                        <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">✏️</button>
-                        <button class="delete-btn" onclick="deleteGrammar(${g.id})" title="Delete">🗑️</button>
+                        <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">
+                            <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                        <button class="delete-btn" onclick="deleteGrammar(${g.id})" title="Delete">
+                            <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
