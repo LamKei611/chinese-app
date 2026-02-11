@@ -231,7 +231,7 @@
         }
 
         .hanzi {
-            font-size: 2.5em;
+            font-size: 1.8em;
             color: #2c3e50;
             font-weight: bold;
         }
@@ -240,6 +240,16 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+        }
+
+        .vocab-content {
+            max-height: 60px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .vocab-content.expanded {
+            max-height: 500px;
         }
 
         .pinyin {
@@ -532,7 +542,7 @@
                     </div>
                     <div class="form-group">
                         <label>Vietnamese Meaning</label>
-                        <input type="text" id="meaning" required placeholder="Xin chào">
+                        <textarea id="meaning" required placeholder="Xin chào" rows="3"></textarea>
                     </div>
                     <button type="submit">Add Word</button>
                 </form>
@@ -806,11 +816,16 @@
                 <div class="vocab-item">
                     <input type="checkbox" class="item-checkbox vocab-checkbox" data-id="${v.id}" onchange="updateVocabCount()">
                     <div class="hanzi">${v.hanzi}</div>
-                    <div class="vocab-details">
-                        <div class="pinyin">${v.pinyin}</div>
-                        ${v.hanViet ? `<div class="han-viet">Hán Việt: ${v.hanViet}</div>` : ''}
-                        <div class="meaning">${v.meaning}</div>
-                        <span class="word-type">${v.wordType}</span>
+                    <div style="flex: 1;">
+                        <div class="vocab-content" id="vocab-content-${v.id}">
+                            <div class="pinyin">${v.pinyin}</div>
+                            ${v.hanViet ? `<div class="han-viet">Hán Việt: ${v.hanViet}</div>` : ''}
+                            <div class="meaning">${v.meaning}</div>
+                            <span class="word-type">${v.wordType}</span>
+                        </div>
+                        <button class="show-more-btn" onclick="toggleVocabContent(${v.id})" id="vocab-toggle-btn-${v.id}">
+                            Show More ▼
+                        </button>
                     </div>
                     <div class="action-buttons">
                         <button class="edit-btn" onclick="editVocab(${v.id})" title="Edit">
@@ -950,6 +965,20 @@
         function toggleGrammarContent(id) {
             const content = document.getElementById(`grammar-content-${id}`);
             const button = document.getElementById(`toggle-btn-${id}`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                button.textContent = 'Show More ▼';
+            } else {
+                content.classList.add('expanded');
+                button.textContent = 'Show Less ▲';
+            }
+        }
+
+        // Toggle vocabulary content expansion
+        function toggleVocabContent(id) {
+            const content = document.getElementById(`vocab-content-${id}`);
+            const button = document.getElementById(`vocab-toggle-btn-${id}`);
             
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
