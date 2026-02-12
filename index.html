@@ -31,7 +31,11 @@
         }
 
         body.grammar-active {
-            background: linear-gradient(135deg, #f5a9c1 0%, #e88ca7 100%); /* Pink for grammar */
+            background: linear-gradient(135deg, #f5a9c1 0%, #e88ca7 100%);
+        }
+
+        body.pinyin-active {
+            background: linear-gradient(135deg, #b3d4f5 0%, #85b8e8 100%);
         }
 
         .container {
@@ -223,17 +227,85 @@
         }
 
         .vocab-item {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); /* Pastel green */
-            display: grid;
-            grid-template-columns: auto auto 1fr auto;
-            gap: 15px;
-            align-items: start;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .vocab-item:hover {
+            filter: brightness(0.97);
         }
 
         .hanzi {
             font-size: 1.8em;
             color: #2c3e50;
             font-weight: bold;
+            min-width: 52px;
+            text-align: center;
+            padding-top: 2px;
+        }
+
+        .vocab-main {
+            flex: 1;
+        }
+
+        .vocab-line1 {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .pinyin {
+            font-size: 1em;
+            color: #3d6b52;
+            font-weight: 600;
+        }
+
+        .word-type {
+            background: rgba(44, 62, 80, 0.12);
+            color: #2c3e50;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.78em;
+            font-weight: 600;
+        }
+
+        .han-viet {
+            font-size: 0.88em;
+            color: #5a7a65;
+            font-style: italic;
+        }
+
+        .vocab-meaning {
+            font-size: 0.95em;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+
+        .vocab-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+        }
+
+        .vocab-content.expanded {
+            max-height: 300px;
+        }
+
+        .vocab-summary {
+            font-size: 0.95em;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+
+        .expand-hint {
+            font-size: 0.75em;
+            color: #7f8c8d;
+            margin-top: 4px;
         }
 
         .vocab-details {
@@ -242,13 +314,13 @@
             gap: 5px;
         }
 
-        .vocab-content {
+        .vocab-content-old {
             max-height: 60px;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
 
-        .vocab-content.expanded {
+        .vocab-content-old.expanded {
             max-height: 500px;
         }
 
@@ -472,26 +544,145 @@
             font-size: 1.1em;
         }
 
+        /* ---- Pinyin Chart ---- */
+        .pinyin-section { }
+
+        .pinyin-intro {
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
+            padding: 18px 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+
+        .pinyin-table-wrap {
+            overflow-x: auto;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .pinyin-table {
+            border-collapse: collapse;
+            min-width: 700px;
+            width: 100%;
+        }
+
+        .pinyin-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .pinyin-table td {
+            text-align: center;
+            padding: 4px;
+            border: 1px solid #e8ecef;
+        }
+
+        .pinyin-table tr:nth-child(even) td {
+            background: #f7f9fc;
+        }
+
+        .pinyin-cell {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: all 0.2s;
+            min-width: 44px;
+            user-select: none;
+        }
+
+        .pinyin-cell:hover {
+            background: #b3d4f5;
+            transform: scale(1.1);
+            color: #1a2a3a;
+        }
+
+        .pinyin-cell.playing {
+            background: #3498db;
+            color: white;
+            transform: scale(1.15);
+        }
+
+        .pinyin-cell.tone-1 { border-top: 3px solid #e74c3c; }
+        .pinyin-cell.tone-2 { border-top: 3px solid #f39c12; }
+        .pinyin-cell.tone-3 { border-top: 3px solid #27ae60; }
+        .pinyin-cell.tone-4 { border-top: 3px solid #8e44ad; }
+
+        .initial-label {
+            background: #ecf0f1;
+            font-weight: 700;
+            color: #2c3e50;
+            padding: 8px 12px;
+            font-size: 1em;
+        }
+
+        .tone-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 12px;
+        }
+
+        .tone-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88em;
+            color: #2c3e50;
+        }
+
+        .tone-dot {
+            width: 14px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .pinyin-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .pinyin-tab-btn {
+            background: rgba(255,255,255,0.5);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: all 0.2s;
+        }
+
+        .pinyin-tab-btn.active, .pinyin-tab-btn:hover {
+            background: #2c3e50;
+            color: white;
+        }
+
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .vocab-item {
-                grid-template-columns: 1fr;
-            }
-
-            .hanzi {
-                font-size: 2em;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .action-buttons {
-                flex-direction: row;
-            }
+            h1 { font-size: 2em; }
+            .vocab-item { flex-wrap: wrap; }
+            .hanzi { font-size: 1.5em; min-width: 42px; }
+            .form-row { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: row; }
         }
     </style>
 </head>
@@ -503,6 +694,7 @@
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('vocab')">Vocabulary</button>
             <button class="tab-button" onclick="switchTab('grammar')">Grammar</button>
+            <button class="tab-button" onclick="switchTab('pinyin')">Pinyin Chart</button>
             <button class="google-sheets-btn" onclick="setupGoogleSheets()" style="margin-left: 20px;">Setup Sheets</button>
             <button class="google-sheets-btn" onclick="syncFromGoogleSheets()">Import from Sheets</button>
         </div>
@@ -617,6 +809,44 @@
                 <div id="grammarList" class="item-list"></div>
             </div>
         </div>
+
+        <!-- Pinyin Chart Section -->
+        <div id="pinyin" class="section pinyin-section">
+            <div class="pinyin-intro">
+                <strong>Interactive Pinyin Chart</strong> — Click any syllable to hear its pronunciation. 
+                Pinyin is the official romanization system for Standard Chinese, using Latin letters to represent Mandarin sounds. 
+                Each syllable can be pronounced in 4 tones (+ neutral). Click a cell to play all 4 tones in sequence.
+            </div>
+
+            <div class="tone-legend">
+                <span style="font-weight:700; color:#2c3e50;">Tones:</span>
+                <span class="tone-item"><span class="tone-dot" style="background:#e74c3c"></span> Tone 1 (ā) — flat, high</span>
+                <span class="tone-item"><span class="tone-dot" style="background:#f39c12"></span> Tone 2 (á) — rising</span>
+                <span class="tone-item"><span class="tone-dot" style="background:#27ae60"></span> Tone 3 (ǎ) — dip then rise</span>
+                <span class="tone-item"><span class="tone-dot" style="background:#8e44ad"></span> Tone 4 (à) — sharp falling</span>
+            </div>
+
+            <div class="pinyin-tabs">
+                <button class="pinyin-tab-btn active" onclick="showPinyinSection('initials', this)">Initials (声母)</button>
+                <button class="pinyin-tab-btn" onclick="showPinyinSection('finals', this)">Finals (韵母)</button>
+                <button class="pinyin-tab-btn" onclick="showPinyinSection('full', this)">Full Chart</button>
+            </div>
+
+            <div id="pinyin-initials" class="pinyin-table-wrap">
+                <div style="color:#555; font-size:0.9em; margin-bottom:12px;">Click a sound to hear all 4 tones. The number shows which tones are available.</div>
+                <div id="initials-grid" style="display:flex; flex-wrap:wrap; gap:10px; padding:8px 0;"></div>
+            </div>
+
+            <div id="pinyin-finals" class="pinyin-table-wrap" style="display:none;">
+                <div style="color:#555; font-size:0.9em; margin-bottom:12px;">Click a sound to hear all 4 tones.</div>
+                <div id="finals-grid" style="display:flex; flex-wrap:wrap; gap:10px; padding:8px 0;"></div>
+            </div>
+
+            <div id="pinyin-full" class="pinyin-table-wrap" style="display:none;">
+                <div style="color:#555; font-size:0.9em; margin-bottom:12px;">Click any cell to hear its pronunciation.</div>
+                <div id="full-chart-container"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -636,12 +866,9 @@
             document.getElementById(tab).classList.add('active');
             event.target.classList.add('active');
             
-            // Change background color based on active tab
-            if (tab === 'grammar') {
-                document.body.classList.add('grammar-active');
-            } else {
-                document.body.classList.remove('grammar-active');
-            }
+            document.body.classList.remove('grammar-active', 'pinyin-active');
+            if (tab === 'grammar') document.body.classList.add('grammar-active');
+            if (tab === 'pinyin') document.body.classList.add('pinyin-active');
         }
 
         // Add or edit vocabulary
@@ -813,21 +1040,22 @@
             }
 
             list.innerHTML = vocabData.map(v => `
-                <div class="vocab-item">
-                    <input type="checkbox" class="item-checkbox vocab-checkbox" data-id="${v.id}" onchange="updateVocabCount()">
+                <div class="vocab-item" onclick="toggleVocabContent(${v.id}, event)">
+                    <input type="checkbox" class="item-checkbox vocab-checkbox" data-id="${v.id}" onchange="updateVocabCount()" onclick="event.stopPropagation()">
                     <div class="hanzi">${v.hanzi}</div>
-                    <div style="flex: 1;">
-                        <div class="vocab-content" id="vocab-content-${v.id}">
-                            <div class="pinyin">${v.pinyin}</div>
-                            ${v.hanViet ? `<div class="han-viet">Hán Việt: ${v.hanViet}</div>` : ''}
-                            <div class="meaning">${v.meaning}</div>
+                    <div class="vocab-main">
+                        <div class="vocab-line1">
+                            <span class="pinyin">${v.pinyin}</span>
                             <span class="word-type">${v.wordType}</span>
+                            ${v.hanViet ? `<span class="han-viet">${v.hanViet}</span>` : ''}
                         </div>
-                        <button class="show-more-btn" onclick="toggleVocabContent(${v.id})" id="vocab-toggle-btn-${v.id}">
-                            Show More ▼
-                        </button>
+                        <div class="vocab-summary">${v.meaning.length > 60 ? v.meaning.substring(0,60) + '…' : v.meaning}</div>
+                        <div class="vocab-content" id="vocab-content-${v.id}">
+                            <div style="margin-top:6px; font-size:0.93em; color:#2c3e50; line-height:1.6;">${v.meaning}</div>
+                        </div>
+                        <div class="expand-hint" id="vocab-hint-${v.id}">▼ tap to expand</div>
                     </div>
-                    <div class="action-buttons">
+                    <div class="action-buttons" onclick="event.stopPropagation()">
                         <button class="edit-btn" onclick="editVocab(${v.id})" title="Edit">
                             <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -975,17 +1203,16 @@
             }
         }
 
-        // Toggle vocabulary content expansion
-        function toggleVocabContent(id) {
+        // Toggle vocabulary content expansion (click-on-card)
+        function toggleVocabContent(id, event) {
             const content = document.getElementById(`vocab-content-${id}`);
-            const button = document.getElementById(`vocab-toggle-btn-${id}`);
-            
+            const hint = document.getElementById(`vocab-hint-${id}`);
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
-                button.textContent = 'Show More ▼';
+                hint.textContent = '▼ tap to expand';
             } else {
                 content.classList.add('expanded');
-                button.textContent = 'Show Less ▲';
+                hint.textContent = '▲ tap to collapse';
             }
         }
 
@@ -1520,6 +1747,182 @@ function doGet(e) {
                 console.error('Silent sync error:', error);
             }
         }
+        // ============================================================
+        //  PINYIN CHART
+        // ============================================================
+        const TONE_MARKS = {
+            a: ['ā','á','ǎ','à'], e: ['ē','é','ě','è'],
+            i: ['ī','í','ǐ','ì'], o: ['ō','ó','ǒ','ò'],
+            u: ['ū','ú','ǔ','ù'], ü: ['ǖ','ǘ','ǚ','ǜ'],
+            A: ['Ā','Á','Ǎ','À']
+        };
+
+        const INITIALS = ['b','p','m','f','d','t','n','l','g','k','h','j','q','x','zh','ch','sh','r','z','c','s','y','w'];
+
+        const FINALS = ['a','o','e','i','u','ü','ai','ei','ao','ou','ia','ie','ua','uo','üe',
+                        'iao','iou','uai','uei','an','en','ang','eng','ong',
+                        'ian','uan','üan','uen','in','ing','iong','uan'];
+
+        // Valid combinations: initials × finals (only real Mandarin syllables)
+        const FULL_CHART = {
+            'b':  ['a','o','e','i','u','ai','ei','ao','ou','ia','ie','iao','an','en','ang','eng','in','ing'],
+            'p':  ['a','o','e','i','u','ai','ei','ao','ou','ia','ie','iao','an','en','ang','eng','in','ing'],
+            'm':  ['a','o','e','i','u','ai','ei','ao','ou','ia','ie','iao','an','en','ang','eng','in','ing'],
+            'f':  ['a','o','e','u','ai','ei','ao','ou','an','en','ang','eng'],
+            'd':  ['a','o','e','i','u','ai','ei','ao','ou','ia','ie','iao','ua','uo','an','en','ang','eng','ong','ian','uan','in','ing'],
+            't':  ['a','o','e','i','u','ai','ei','ao','ou','ie','iao','ua','uo','an','en','ang','eng','ong','ian','uan','in','ing'],
+            'n':  ['a','o','e','i','u','ü','ai','ei','ao','ou','ia','ie','iao','ua','uo','üe','an','en','ang','eng','ong','ian','uan','üan','in','ing'],
+            'l':  ['a','o','e','i','u','ü','ai','ei','ao','ou','ia','ie','iao','ua','uo','üe','an','en','ang','eng','ong','ian','uan','üan','in','ing'],
+            'g':  ['a','o','e','u','ai','ei','ao','ou','ua','uo','uai','uei','an','en','ang','eng','ong','uan','uen'],
+            'k':  ['a','o','e','u','ai','ei','ao','ou','ua','uo','uai','uei','an','en','ang','eng','ong','uan','uen'],
+            'h':  ['a','o','e','u','ai','ei','ao','ou','ua','uo','uai','uei','an','en','ang','eng','ong','uan','uen'],
+            'j':  ['i','ü','ia','ie','iao','iou','üe','ian','üan','in','ing','iong'],
+            'q':  ['i','ü','ia','ie','iao','iou','üe','ian','üan','in','ing','iong'],
+            'x':  ['i','ü','ia','ie','iao','iou','üe','ian','üan','in','ing','iong'],
+            'zh': ['a','o','e','i','u','ai','ei','ao','ou','ua','uo','uai','uei','an','en','ang','eng','ong','uan','uen'],
+            'ch': ['a','o','e','i','u','ai','ei','ao','ou','ua','uo','uai','uei','an','en','ang','eng','ong','uan','uen'],
+            'sh': ['a','o','e','i','u','ai','ei','ao','ou','ua','uo','uai','uei','an','en','ang','eng','uan','uen'],
+            'r':  ['e','i','u','ao','ou','ua','uo','uei','an','en','ang','eng','ong','uan','uen'],
+            'z':  ['a','o','e','i','u','ai','ei','ao','ou','an','en','ang','eng','ong','uan','uen'],
+            'c':  ['a','o','e','i','u','ai','ei','ao','ou','an','en','ang','eng','ong','uan','uen'],
+            's':  ['a','o','e','i','u','ai','ei','ao','ou','an','en','ang','eng','ong','uan','uen'],
+            'y':  ['a','i','u','ü','ai','ao','ou','ia','ie','ua','üe','iao','an','en','ang','eng','ong','ian','üan','in','ing','iong'],
+            'w':  ['a','o','e','u','ai','ei','an','en','ang','eng','ong'],
+            '(none)': ['a','o','e','ai','ei','ao','ou','an','en','ang','eng','er']
+        };
+
+        // Map written finals to spoken syllable (e.g. iou→iu, uei→ui when after initial)
+        function buildSyllable(initial, final) {
+            if (initial === '(none)') return final === 'ü' ? 'yu' : final;
+            let syl = initial + final;
+            // Spelling rules
+            syl = syl.replace('jiü','ju').replace('qiü','qu').replace('xiü','xu').replace('liü','lü').replace('niü','nü');
+            syl = syl.replace('jüe','jue').replace('qüe','que').replace('xüe','xue').replace('lüe','lüe').replace('nüe','nüe');
+            syl = syl.replace('jü','ju').replace('qü','qu').replace('xü','xu');
+            return syl;
+        }
+
+        function applyTone(syllable, tone) {
+            // Apply tone mark to the correct vowel
+            const toneVowelOrder = ['a','e','ou','o','i','u','ü'];
+            for (let v of toneVowelOrder) {
+                if (syllable.includes(v)) {
+                    const marked = TONE_MARKS[v] ? TONE_MARKS[v][tone-1] : v;
+                    return syllable.replace(v, marked);
+                }
+            }
+            return syllable;
+        }
+
+        function speakPinyin(syllable) {
+            if (!window.speechSynthesis) {
+                alert('Your browser does not support speech synthesis.');
+                return;
+            }
+            window.speechSynthesis.cancel();
+            // Play tones 1–4 with a small delay between
+            [1,2,3,4].forEach((tone, i) => {
+                setTimeout(() => {
+                    const text = applyTone(syllable, tone);
+                    const utter = new SpeechSynthesisUtterance(text);
+                    utter.lang = 'zh-CN';
+                    utter.rate = 0.8;
+                    utter.pitch = tone === 1 ? 1.2 : tone === 2 ? 1.1 : tone === 3 ? 0.9 : 0.8;
+                    window.speechSynthesis.speak(utter);
+                }, i * 700);
+            });
+        }
+
+        function makePinyinCell(syllable, label) {
+            const btn = document.createElement('button');
+            btn.className = 'pinyin-cell';
+            btn.textContent = label || syllable;
+            btn.title = `Click to hear "${syllable}" in all 4 tones`;
+            btn.onclick = () => {
+                document.querySelectorAll('.pinyin-cell.playing').forEach(c => c.classList.remove('playing'));
+                btn.classList.add('playing');
+                speakPinyin(syllable);
+                setTimeout(() => btn.classList.remove('playing'), 3000);
+            };
+            return btn;
+        }
+
+        function buildInitialsGrid() {
+            const grid = document.getElementById('initials-grid');
+            grid.innerHTML = '';
+            INITIALS.forEach(initial => {
+                const cell = makePinyinCell(initial + 'i', initial);
+                grid.appendChild(cell);
+            });
+        }
+
+        function buildFinalsGrid() {
+            const grid = document.getElementById('finals-grid');
+            grid.innerHTML = '';
+            FINALS.forEach(final => {
+                const display = final;
+                const syllable = final === 'ü' ? 'yu' : final;
+                const cell = makePinyinCell(syllable, display);
+                grid.appendChild(cell);
+            });
+        }
+
+        function buildFullChart() {
+            const container = document.getElementById('full-chart-container');
+            container.innerHTML = '';
+            const table = document.createElement('table');
+            table.className = 'pinyin-table';
+
+            // Header row
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<th>Initial \\ Final</th>';
+            FINALS.forEach(f => {
+                const th = document.createElement('th');
+                th.textContent = f;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            Object.entries(FULL_CHART).forEach(([initial, validFinals]) => {
+                const row = document.createElement('tr');
+                const label = document.createElement('td');
+                label.className = 'initial-label';
+                label.textContent = initial === '(none)' ? '—' : initial;
+                row.appendChild(label);
+
+                FINALS.forEach(final => {
+                    const td = document.createElement('td');
+                    if (validFinals.includes(final)) {
+                        const syl = buildSyllable(initial, final);
+                        const cell = makePinyinCell(syl, syl);
+                        cell.style.fontSize = '0.82em';
+                        cell.style.padding = '4px 6px';
+                        cell.style.minWidth = 'unset';
+                        td.appendChild(cell);
+                    }
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
+        function showPinyinSection(section, btn) {
+            document.querySelectorAll('.pinyin-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('pinyin-initials').style.display = section === 'initials' ? '' : 'none';
+            document.getElementById('pinyin-finals').style.display   = section === 'finals'   ? '' : 'none';
+            document.getElementById('pinyin-full').style.display     = section === 'full'     ? '' : 'none';
+            if (section === 'full') buildFullChart();
+        }
+
+        // Build grids on load
+        buildInitialsGrid();
+        buildFinalsGrid();
     </script>
 </body>
 </html>
