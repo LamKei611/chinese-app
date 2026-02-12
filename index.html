@@ -357,6 +357,18 @@
             display: flex;
             gap: 15px;
             align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .grammar-item:hover {
+            filter: brightness(0.97);
+        }
+
+        .grammar-summary {
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 2px;
         }
 
         .grammar-title {
@@ -381,9 +393,9 @@
         }
 
         .grammar-content {
-            max-height: 80px;
+            max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease;
+            transition: max-height 0.35s ease;
         }
 
         .grammar-content.expanded {
@@ -868,7 +880,14 @@
             
             document.body.classList.remove('grammar-active', 'pinyin-active');
             if (tab === 'grammar') document.body.classList.add('grammar-active');
-            if (tab === 'pinyin') document.body.classList.add('pinyin-active');
+            if (tab === 'pinyin') {
+                document.body.classList.add('pinyin-active');
+                // Build pinyin grids after section is visible
+                setTimeout(() => {
+                    buildInitialsGrid();
+                    buildFinalsGrid();
+                }, 50);
+            }
         }
 
         // Add or edit vocabulary
@@ -1049,9 +1068,9 @@
                             <span class="word-type">${v.wordType}</span>
                             ${v.hanViet ? `<span class="han-viet">${v.hanViet}</span>` : ''}
                         </div>
-                        <div class="vocab-summary">${v.meaning.length > 60 ? v.meaning.substring(0,60) + '…' : v.meaning}</div>
+                        <div class="vocab-summary" id="vocab-summary-${v.id}">${v.meaning.length > 60 ? v.meaning.substring(0,60) + '…' : v.meaning}</div>
                         <div class="vocab-content" id="vocab-content-${v.id}">
-                            <div style="margin-top:6px; font-size:0.93em; color:#2c3e50; line-height:1.6;">${v.meaning}</div>
+                            <div style="margin-top:4px; font-size:0.93em; color:#2c3e50; line-height:1.6;">${v.meaning}</div>
                         </div>
                         <div class="expand-hint" id="vocab-hint-${v.id}">▼ tap to expand</div>
                     </div>
@@ -1083,19 +1102,18 @@
             }
 
             list.innerHTML = grammarData.map(g => `
-                <div class="grammar-item">
-                    <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()">
+                <div class="grammar-item" onclick="toggleGrammarContent(${g.id})">
+                    <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()" onclick="event.stopPropagation()">
                     <div style="flex: 1;">
                         <div class="grammar-title">${g.pattern}</div>
+                        <div class="grammar-summary" id="grammar-summary-${g.id}">${g.notes ? g.notes.substring(0,60) + (g.notes.length > 60 ? '…' : '') : (g.examples ? g.examples.substring(0,60) + '…' : '')}</div>
                         <div class="grammar-content" id="grammar-content-${g.id}">
                             ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
                             <div class="grammar-example"><strong>Examples:</strong><br>${g.examples.replace(/\n/g, '<br>')}</div>
                         </div>
-                        <button class="show-more-btn" onclick="toggleGrammarContent(${g.id})" id="toggle-btn-${g.id}">
-                            Show More ▼
-                        </button>
+                        <div class="expand-hint" id="grammar-hint-${g.id}">▼ tap to expand</div>
                     </div>
-                    <div class="action-buttons" style="margin-top: 10px;">
+                    <div class="action-buttons" style="margin-top: 10px;" onclick="event.stopPropagation()">
                         <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">
                             <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -1189,29 +1207,34 @@
             });
         }
 
-        // Toggle grammar content expansion
+        // Toggle grammar content expansion (click-on-card)
         function toggleGrammarContent(id) {
             const content = document.getElementById(`grammar-content-${id}`);
-            const button = document.getElementById(`toggle-btn-${id}`);
-            
+            const summary = document.getElementById(`grammar-summary-${id}`);
+            const hint = document.getElementById(`grammar-hint-${id}`);
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
-                button.textContent = 'Show More ▼';
+                summary.style.display = '';
+                hint.textContent = '▼ tap to expand';
             } else {
                 content.classList.add('expanded');
-                button.textContent = 'Show Less ▲';
+                summary.style.display = 'none';
+                hint.textContent = '▲ tap to collapse';
             }
         }
 
         // Toggle vocabulary content expansion (click-on-card)
         function toggleVocabContent(id, event) {
             const content = document.getElementById(`vocab-content-${id}`);
+            const summary = document.getElementById(`vocab-summary-${id}`);
             const hint = document.getElementById(`vocab-hint-${id}`);
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
+                summary.style.display = '';
                 hint.textContent = '▼ tap to expand';
             } else {
                 content.classList.add('expanded');
+                summary.style.display = 'none';
                 hint.textContent = '▲ tap to collapse';
             }
         }
@@ -1847,22 +1870,46 @@ function doGet(e) {
             return btn;
         }
 
+        let pinyinBuilt = false;
+
         function buildInitialsGrid() {
             const grid = document.getElementById('initials-grid');
+            if (!grid) return;
             grid.innerHTML = '';
+            // Map each initial to a real Mandarin syllable for pronunciation
+            const initialSyllables = {
+                'b':'ba','p':'pa','m':'ma','f':'fa',
+                'd':'da','t':'ta','n':'na','l':'la',
+                'g':'ga','k':'ka','h':'ha',
+                'j':'ji','q':'qi','x':'xi',
+                'zh':'zhi','ch':'chi','sh':'shi','r':'ri',
+                'z':'zi','c':'ci','s':'si',
+                'y':'ya','w':'wa'
+            };
             INITIALS.forEach(initial => {
-                const cell = makePinyinCell(initial + 'i', initial);
+                const syl = initialSyllables[initial] || initial + 'a';
+                const cell = makePinyinCell(syl, initial);
                 grid.appendChild(cell);
             });
         }
 
         function buildFinalsGrid() {
             const grid = document.getElementById('finals-grid');
+            if (!grid) return;
             grid.innerHTML = '';
+            // Map finals to standalone pronounceable syllables
+            const finalSyllables = {
+                'a':'a','o':'o','e':'e','i':'yi','u':'wu','ü':'yu',
+                'ai':'ai','ei':'ei','ao':'ao','ou':'ou',
+                'ia':'ya','ie':'ye','ua':'wa','uo':'wo','üe':'yue',
+                'iao':'yao','iou':'you','uai':'wai','uei':'wei',
+                'an':'an','en':'en','ang':'ang','eng':'eng','ong':'weng',
+                'ian':'yan','uan':'wan','üan':'yuan','uen':'wen',
+                'in':'yin','ing':'ying','iong':'yong'
+            };
             FINALS.forEach(final => {
-                const display = final;
-                const syllable = final === 'ü' ? 'yu' : final;
-                const cell = makePinyinCell(syllable, display);
+                const syl = finalSyllables[final] || final;
+                const cell = makePinyinCell(syl, final);
                 grid.appendChild(cell);
             });
         }
@@ -1920,9 +1967,7 @@ function doGet(e) {
             if (section === 'full') buildFullChart();
         }
 
-        // Build grids on load
-        buildInitialsGrid();
-        buildFinalsGrid();
+        // Pinyin grids are built lazily when the Pinyin tab is clicked
     </script>
 </body>
 </html>
