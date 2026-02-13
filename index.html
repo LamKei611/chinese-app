@@ -133,7 +133,7 @@
             border-radius: 10px;
             font-size: 1em;
             transition: all 0.3s;
-            font-family: inherit;
+            font-family: 'Montserrat', sans-serif;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -162,6 +162,7 @@
             cursor: pointer;
             font-size: 1em;
             font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(44,62,80,0.4);
         }
@@ -304,10 +305,26 @@
             line-height: 1.5;
         }
 
-        .expand-hint {
+        .expand-btn {
+            background: transparent;
+            color: #5a7a65;
+            border: 1px solid #5a7a65;
+            padding: 3px 12px;
+            border-radius: 12px;
+            cursor: pointer;
             font-size: 0.75em;
-            color: #7f8c8d;
-            margin-top: 4px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 6px;
+            transition: all 0.2s;
+            box-shadow: none;
+        }
+
+        .expand-btn:hover {
+            background: #5a7a65;
+            color: white;
+            transform: none;
+            box-shadow: none;
         }
 
         .vocab-details {
@@ -883,7 +900,7 @@
                 const isLong = v.meaning.length > 60;
                 const preview = isLong ? v.meaning.substring(0, 60) + '…' : v.meaning;
                 return `
-                <div class="vocab-item" onclick="toggleVocabContent(${v.id}, event)">
+                <div class="vocab-item">
                     <input type="checkbox" class="item-checkbox vocab-checkbox" data-id="${v.id}" onchange="updateVocabCount()" onclick="event.stopPropagation()">
                     <div class="hanzi">${v.hanzi}</div>
                     <div class="vocab-main">
@@ -896,9 +913,9 @@
                         <div class="vocab-content" id="vocab-content-${v.id}">
                             ${isLong ? `<div style="margin-top:4px; font-size:0.93em; color:#2c3e50; line-height:1.6;">${v.meaning}</div>` : ''}
                         </div>
-                        ${isLong ? `<div class="expand-hint" id="vocab-hint-${v.id}">▼ tap to expand</div>` : ''}
+                        ${isLong ? `<button class="expand-btn" id="vocab-hint-${v.id}" onclick="toggleVocabContent(${v.id}, event)">Show more ▼</button>` : ''}
                     </div>
-                    <div class="action-buttons" onclick="event.stopPropagation()">
+                    <div class="action-buttons">
                         <button class="edit-btn" onclick="editVocab(${v.id})" title="Edit">
                             <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -930,7 +947,7 @@
                 const exPreview = g.examples ? (g.examples.length > 70 ? g.examples.substring(0,70) + '…' : g.examples) : '';
                 const preview = notesPreview || exPreview;
                 return `
-                <div class="grammar-item" onclick="toggleGrammarContent(${g.id})">
+                <div class="grammar-item">
                     <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()" onclick="event.stopPropagation()">
                     <div style="flex: 1;">
                         <div class="grammar-title">${g.pattern}</div>
@@ -939,9 +956,9 @@
                             ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
                             <div class="grammar-example"><strong>Examples:</strong><br>${g.examples.replace(/\n/g, '<br>')}</div>
                         </div>
-                        <div class="expand-hint" id="grammar-hint-${g.id}">▼ tap to expand</div>
+                        <button class="expand-btn" id="grammar-hint-${g.id}" onclick="toggleGrammarContent(${g.id})">Show more ▼</button>
                     </div>
-                    <div class="action-buttons" style="margin-top: 10px;" onclick="event.stopPropagation()">
+                    <div class="action-buttons" style="margin-top: 10px;">
                         <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">
                             <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -1035,37 +1052,38 @@
             });
         }
 
-        // Toggle vocabulary content expansion (click-on-card)
+        // Toggle vocabulary content expansion
         function toggleVocabContent(id, event) {
+            if (event) event.stopPropagation();
             const content = document.getElementById(`vocab-content-${id}`);
             const summary = document.getElementById(`vocab-summary-${id}`);
-            const hint = document.getElementById(`vocab-hint-${id}`);
+            const btn = document.getElementById(`vocab-hint-${id}`);
             if (!content) return;
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
                 if (summary) summary.style.display = '';
-                if (hint) hint.textContent = '▼ tap to expand';
+                if (btn) btn.textContent = 'Show more ▼';
             } else {
                 content.classList.add('expanded');
                 if (summary) summary.style.display = 'none';
-                if (hint) hint.textContent = '▲ tap to collapse';
+                if (btn) btn.textContent = 'Show less ▲';
             }
         }
 
-        // Toggle grammar content expansion (click-on-card)
+        // Toggle grammar content expansion
         function toggleGrammarContent(id) {
             const content = document.getElementById(`grammar-content-${id}`);
             const summary = document.getElementById(`grammar-summary-${id}`);
-            const hint = document.getElementById(`grammar-hint-${id}`);
+            const btn = document.getElementById(`grammar-hint-${id}`);
             if (!content) return;
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
                 if (summary) summary.style.display = '';
-                if (hint) hint.textContent = '▼ tap to expand';
+                if (btn) btn.textContent = 'Show more ▼';
             } else {
                 content.classList.add('expanded');
                 if (summary) summary.style.display = 'none';
-                if (hint) hint.textContent = '▲ tap to collapse';
+                if (btn) btn.textContent = 'Show less ▲';
             }
         }
 
