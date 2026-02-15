@@ -576,11 +576,307 @@
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 2em; }
-            .vocab-item { flex-wrap: wrap; }
-            .hanzi { font-size: 1.5em; min-width: 42px; }
-            .form-row { grid-template-columns: 1fr; }
-            .action-buttons { flex-direction: row; }
+            /* ── Body & Container ── */
+            body {
+                padding: 0;
+                padding-bottom: 80px; /* space for bottom nav */
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            /* ── Header ── */
+            h1 {
+                font-size: 1.7em;
+                padding: 18px 16px 4px;
+                margin-bottom: 2px;
+            }
+
+            .subtitle {
+                font-size: 0.82em;
+                margin-bottom: 0;
+                padding: 0 16px 12px;
+            }
+
+            /* ── Hide top tab bar, use bottom nav instead ── */
+            .tabs {
+                display: none;
+            }
+
+            /* ── Bottom Navigation Bar ── */
+            .bottom-nav {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                background: white;
+                box-shadow: 0 -2px 16px rgba(0,0,0,0.13);
+                border-top: 1px solid #e8e8e8;
+            }
+
+            .bottom-nav-btn {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 4px 8px;
+                background: white;
+                border: none;
+                cursor: pointer;
+                font-size: 0.65em;
+                font-weight: 600;
+                color: #aaa;
+                gap: 3px;
+                box-shadow: none;
+                border-radius: 0;
+                transition: color 0.2s;
+            }
+
+            .bottom-nav-btn.active {
+                color: #2c3e50;
+            }
+
+            .bottom-nav-btn svg {
+                width: 24px;
+                height: 24px;
+                fill: currentColor;
+            }
+
+            .bottom-nav-btn.sheets-btn {
+                font-size: 0.6em;
+                color: #95a5a6;
+            }
+
+            /* ── Section padding on mobile ── */
+            .section {
+                padding: 12px 12px 0;
+            }
+
+            /* ── Cards ── */
+            .card {
+                border-radius: 14px;
+                padding: 16px;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            }
+
+            .card h2 {
+                font-size: 1em;
+                margin-bottom: 14px !important;
+            }
+
+            /* ── Form collapsible on mobile ── */
+            .mobile-form-toggle {
+                display: flex !important;
+                width: 100%;
+                background: linear-gradient(135deg, #2c3e50, #34495e);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 13px 18px;
+                font-size: 0.92em;
+                font-weight: 700;
+                font-family: 'Montserrat', sans-serif;
+                cursor: pointer;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+                box-shadow: 0 3px 10px rgba(44,62,80,0.3);
+            }
+
+            .mobile-form-toggle:hover, .mobile-form-toggle:active {
+                transform: none;
+                box-shadow: 0 3px 10px rgba(44,62,80,0.3);
+            }
+
+            .form-collapsible {
+                display: none;
+            }
+
+            .form-collapsible.open {
+                display: block;
+            }
+
+            /* ── Form inputs ── */
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            label {
+                font-size: 0.82em;
+                margin-bottom: 5px;
+            }
+
+            input, select, textarea {
+                padding: 10px 12px;
+                font-size: 0.9em;
+                border-radius: 8px;
+            }
+
+            textarea {
+                min-height: 70px;
+            }
+
+            /* Submit button full-width on mobile */
+            form > button[type="submit"] {
+                width: 100%;
+                padding: 13px;
+                font-size: 0.95em;
+                border-radius: 12px;
+            }
+
+            /* ── Controls bar ── */
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .controls h2 {
+                font-size: 1em;
+            }
+
+            .sort-buttons {
+                gap: 6px;
+                width: 100%;
+            }
+
+            .sort-btn {
+                padding: 6px 12px;
+                font-size: 0.78em;
+                flex: 1;
+                text-align: center;
+            }
+
+            /* ── Selection controls ── */
+            .selection-controls {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            .selection-controls input[type="text"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: unset;
+                order: -1;
+            }
+
+            .select-btn {
+                padding: 6px 12px;
+                font-size: 0.78em;
+            }
+
+            .print-btn {
+                padding: 7px 14px;
+                font-size: 0.8em;
+            }
+
+            /* ── Vocab items ── */
+            .vocab-item {
+                padding: 13px;
+                gap: 10px;
+                flex-wrap: nowrap;
+                border-radius: 12px;
+            }
+
+            .vocab-item:hover {
+                transform: none;
+            }
+
+            .hanzi {
+                font-size: 1.6em;
+                min-width: 44px;
+            }
+
+            .vocab-main {
+                min-width: 0; /* allow text to truncate */
+            }
+
+            .vocab-line1 {
+                gap: 5px;
+            }
+
+            .pinyin {
+                font-size: 0.9em;
+            }
+
+            .word-type {
+                font-size: 0.7em;
+                padding: 2px 7px;
+            }
+
+            .han-viet {
+                font-size: 0.8em;
+            }
+
+            .vocab-summary {
+                font-size: 0.85em;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 6px;
+                flex-shrink: 0;
+            }
+
+            .edit-btn, .delete-btn {
+                padding: 7px 9px;
+            }
+
+            .item-checkbox {
+                width: 18px;
+                height: 18px;
+                margin-right: 4px;
+                flex-shrink: 0;
+            }
+
+            /* ── Grammar items ── */
+            .grammar-item {
+                padding: 13px;
+                border-radius: 12px;
+            }
+
+            .grammar-item:hover {
+                transform: none;
+            }
+
+            .grammar-title {
+                font-size: 1em;
+                margin-bottom: 6px;
+            }
+
+            .grammar-summary {
+                font-size: 0.82em;
+            }
+
+            .grammar-example {
+                padding: 8px 10px;
+                font-size: 0.85em;
+            }
+
+            .grammar-notes {
+                font-size: 0.85em;
+            }
+
+            .expand-btn {
+                font-size: 0.7em;
+                padding: 3px 10px;
+            }
+        }
+
+        /* Bottom nav hidden on desktop */
+        .bottom-nav {
+            display: none;
         }
     </style>
 </head>
@@ -589,6 +885,7 @@
         <h1>Chinese Learning Notebook</h1>
         <p class="subtitle">Your friendly companion for vocabulary and grammar</p>
 
+        <!-- Desktop tab bar -->
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('vocab', this)">Vocabulary</button>
             <button class="tab-button" onclick="switchTab('grammar', this)">Grammar</button>
@@ -596,10 +893,31 @@
             <button class="google-sheets-btn" onclick="syncFromGoogleSheets()">Import from Sheets</button>
         </div>
 
+        <!-- Mobile bottom navigation -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="bottom-nav-btn active" id="mobileVocabBtn" onclick="switchTab('vocab', null); setMobileNav(this)">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+                Vocabulary
+            </button>
+            <button class="bottom-nav-btn" id="mobileGrammarBtn" onclick="switchTab('grammar', null); setMobileNav(this)">
+                <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+                Grammar
+            </button>
+            <button class="bottom-nav-btn sheets-btn" onclick="setupGoogleSheets()">
+                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                Sync
+            </button>
+        </nav>
+
         <!-- Vocabulary Section -->
         <div id="vocab" class="section active">
             <div class="card">
+                <button class="mobile-form-toggle" onclick="toggleMobileForm('vocabFormCollapse', this)" style="display:none;">
+                    <span>➕ Add New Word</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
                 <h2 style="color: #2c3e50; margin-bottom: 20px;">Add New Word</h2>
+                <div class="form-collapsible open" id="vocabFormCollapse">
                 <form id="vocabForm" onsubmit="addVocab(event)">
                     <div class="form-row">
                         <div class="form-group">
@@ -635,6 +953,7 @@
                     </div>
                     <button type="submit">Add Word</button>
                 </form>
+                </div>
             </div>
 
             <div class="card">
@@ -665,7 +984,12 @@
         <!-- Grammar Section -->
         <div id="grammar" class="section">
             <div class="card">
+                <button class="mobile-form-toggle" onclick="toggleMobileForm('grammarFormCollapse', this)" style="display:none;">
+                    <span>➕ Add New Grammar</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
                 <h2 style="color: #2c3e50; margin-bottom: 20px;">Add New Grammar</h2>
+                <div class="form-collapsible open" id="grammarFormCollapse">
                 <form id="grammarForm" onsubmit="addGrammar(event)">
                     <div class="form-group">
                         <label>Grammar Pattern</label>
@@ -681,6 +1005,7 @@
                     </div>
                     <button type="submit">Add Grammar</button>
                 </form>
+                </div>
             </div>
 
             <div class="card">
@@ -727,6 +1052,44 @@
             document.body.classList.remove('grammar-active');
             if (tab === 'grammar') document.body.classList.add('grammar-active');
         }
+
+        // Mobile bottom nav highlight
+        function setMobileNav(btn) {
+            document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Toggle collapsible form on mobile
+        function toggleMobileForm(collapseId, toggleBtn) {
+            const form = document.getElementById(collapseId);
+            const arrow = toggleBtn.querySelector('.toggle-arrow');
+            if (form.classList.contains('open')) {
+                form.classList.remove('open');
+                arrow.textContent = '▼';
+            } else {
+                form.classList.add('open');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // On mobile: show toggle button, hide h2, collapse form by default
+        function initMobileForms() {
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.mobile-form-toggle').forEach(btn => {
+                    btn.style.display = 'flex';
+                });
+                document.querySelectorAll('.form-collapsible').forEach(f => {
+                    f.classList.remove('open');
+                });
+                // Hide the static h2 headings inside form cards
+                document.querySelectorAll('.card h2').forEach(h2 => {
+                    if (h2.textContent.includes('Add New')) h2.style.display = 'none';
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initMobileForms);
+        window.addEventListener('resize', initMobileForms);
 
         // Add or edit vocabulary
         function addVocab(event) {
