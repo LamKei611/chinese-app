@@ -221,14 +221,14 @@
             gap: 15px;
         }
 
-        .vocab-item, .grammar-item {
+        .vocab-item, .grammar-item, .pinyin-item {
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: all 0.3s;
         }
 
-        .vocab-item:hover, .grammar-item:hover {
+        .vocab-item:hover, .grammar-item:hover, .pinyin-item:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
@@ -2198,6 +2198,15 @@ function doGet(e) {
                     })
                 });
 
+                // Sync pinyin
+                await fetch(googleSheetsUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'pinyin',
+                        items: pinyinData
+                    })
+                });
+
                 console.log('Synced to Google Sheets');
             } catch (error) {
                 console.error('Sync error:', error);
@@ -2221,6 +2230,7 @@ function doGet(e) {
 
                 let importedVocab = 0;
                 let importedGrammar = 0;
+                let importedPinyin = 0;
 
                 // Import vocabulary
                 if (data.vocab && data.vocab.length > 0) {
@@ -2283,16 +2293,46 @@ function doGet(e) {
                     });
                 }
 
+                // Import pinyin
+                if (data.pinyin && data.pinyin.length > 0) {
+                    data.pinyin.forEach(item => {
+                        // Check if item already exists by pattern
+                        const existingIndex = pinyinData.findIndex(p => 
+                            p.pattern === item.pattern
+                        );
+                        
+                        if (existingIndex === -1) {
+                            // Add new item with unique ID
+                            pinyinData.push({
+                                id: Date.now() + Math.random(),
+                                pattern: item.pattern,
+                                examples: item.examples,
+                                notes: item.notes || '',
+                                date: item.date || new Date().toISOString()
+                            });
+                            importedPinyin++;
+                        } else {
+                            // Update existing item
+                            pinyinData[existingIndex] = {
+                                ...pinyinData[existingIndex],
+                                examples: item.examples,
+                                notes: item.notes || pinyinData[existingIndex].notes
+                            };
+                        }
+                    });
+                }
+
                 // Save to localStorage
                 localStorage.setItem('vocabData', JSON.stringify(vocabData));
                 localStorage.setItem('grammarData', JSON.stringify(grammarData));
+                localStorage.setItem('pinyinData', JSON.stringify(pinyinData));
 
                 // Re-render
                 renderVocab();
                 renderGrammar();
                 renderPinyin();
 
-                alert(`Successfully imported!\nNew vocabulary: ${importedVocab}\nNew grammar: ${importedGrammar}`);
+                alert(`Successfully imported!\nNew vocabulary: ${importedVocab}\nNew grammar: ${importedGrammar}\nNew pinyin: ${importedPinyin}`);
             } catch (error) {
                 console.error('Import error:', error);
                 alert('Error importing from Google Sheets. Make sure:\n1. You deployed the script with doGet() function\n2. Access is set to "Anyone"\n3. The URL is correct');
@@ -2360,8 +2400,34 @@ function doGet(e) {
                     });
                 }
 
+                // Import pinyin
+                if (data.pinyin && data.pinyin.length > 0) {
+                    data.pinyin.forEach(item => {
+                        const existingIndex = pinyinData.findIndex(p => 
+                            p.pattern === item.pattern
+                        );
+                        
+                        if (existingIndex === -1) {
+                            pinyinData.push({
+                                id: Date.now() + Math.random(),
+                                pattern: item.pattern,
+                                examples: item.examples,
+                                notes: item.notes || '',
+                                date: item.date || new Date().toISOString()
+                            });
+                        } else {
+                            pinyinData[existingIndex] = {
+                                ...pinyinData[existingIndex],
+                                examples: item.examples,
+                                notes: item.notes || pinyinData[existingIndex].notes
+                            };
+                        }
+                    });
+                }
+
                 localStorage.setItem('vocabData', JSON.stringify(vocabData));
                 localStorage.setItem('grammarData', JSON.stringify(grammarData));
+                localStorage.setItem('pinyinData', JSON.stringify(pinyinData));
                 renderVocab();
                 renderGrammar();
                 renderPinyin();
