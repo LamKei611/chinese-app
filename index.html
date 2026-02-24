@@ -1019,7 +1019,7 @@
                         </div>
                         <div class="form-group">
                             <label>Pinyin</label>
-                            <input type="text" id="pinyin" required placeholder="nǐ hǎo">
+                            <input type="text" id="pinyin" placeholder="nǐ hǎo">
                         </div>
                     </div>
                     <div class="form-row">
@@ -1029,7 +1029,7 @@
                         </div>
                         <div class="form-group">
                             <label>Type of Word</label>
-                            <input type="text" id="wordType" list="wordTypeOptions" required placeholder="Select or type your own...">
+                            <input type="text" id="wordType" list="wordTypeOptions" placeholder="Select or type your own...">
                             <datalist id="wordTypeOptions">
                                 <option value="Noun (Danh từ)">
                                 <option value="Verb (Động từ)">
@@ -1042,7 +1042,7 @@
                     </div>
                     <div class="form-group">
                         <label>Vietnamese Meaning</label>
-                        <textarea id="meaning" required placeholder="Xin chào" rows="3"></textarea>
+                        <textarea id="meaning" placeholder="Xin chào" rows="3"></textarea>
                     </div>
                     <button type="submit">Add Word</button>
                 </form>
@@ -1090,7 +1090,7 @@
                     </div>
                     <div class="form-group">
                         <label>Examples</label>
-                        <textarea id="grammarExamples" required placeholder="他不是老师，而是学生。&#10;Anh ấy không phải là giáo viên mà là học sinh."></textarea>
+                        <textarea id="grammarExamples" placeholder="他不是老师，而是学生。&#10;Anh ấy không phải là giáo viên mà là học sinh."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Notes</label>
@@ -1141,7 +1141,7 @@
                     </div>
                     <div class="form-group">
                         <label>Pronunciation</label>
-                        <textarea id="pinyinExamples" required placeholder="zhī, zhá, zhǎ, zhà..."></textarea>
+                        <textarea id="pinyinExamples" placeholder="zhī, zhá, zhǎ, zhà..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Notes</label>
@@ -1242,9 +1242,15 @@
         function addVocab(event) {
             event.preventDefault();
             
+            const hanzi = document.getElementById('hanzi').value.trim();
+            if (!hanzi) {
+                alert('Please enter at least Hanzi (汉字)');
+                return;
+            }
+            
             const vocab = {
                 id: editingVocabId || Date.now(),
-                hanzi: document.getElementById('hanzi').value,
+                hanzi: hanzi,
                 pinyin: document.getElementById('pinyin').value,
                 hanViet: document.getElementById('hanViet').value,
                 wordType: document.getElementById('wordType').value,
@@ -1276,9 +1282,15 @@
         function addGrammar(event) {
             event.preventDefault();
             
+            const pattern = document.getElementById('grammarPattern').value.trim();
+            if (!pattern) {
+                alert('Please enter at least Grammar Pattern');
+                return;
+            }
+            
             const grammar = {
                 id: editingGrammarId || Date.now(),
-                pattern: document.getElementById('grammarPattern').value,
+                pattern: pattern,
                 examples: document.getElementById('grammarExamples').value,
                 notes: document.getElementById('grammarNotes').value,
                 date: editingGrammarId ? grammarData.find(g => g.id === editingGrammarId).date : new Date().toISOString()
@@ -1407,21 +1419,22 @@
             }
 
             list.innerHTML = vocabData.map(v => {
-                const isLong = v.meaning.length > 60;
-                const preview = isLong ? v.meaning.substring(0, 60) + '…' : v.meaning;
+                const meaning = v.meaning || '';
+                const isLong = meaning.length > 60;
+                const preview = isLong ? meaning.substring(0, 60) + '…' : meaning;
                 return `
                 <div class="vocab-item">
                     <input type="checkbox" class="item-checkbox vocab-checkbox" data-id="${v.id}" onchange="updateVocabCount()" onclick="event.stopPropagation()">
                     <div class="hanzi">${v.hanzi}</div>
                     <div class="vocab-main">
                         <div class="vocab-line1">
-                            <span class="pinyin">${v.pinyin}</span>
-                            <span class="word-type">${v.wordType}</span>
+                            ${v.pinyin ? `<span class="pinyin">${v.pinyin}</span>` : ''}
+                            ${v.wordType ? `<span class="word-type">${v.wordType}</span>` : ''}
                             ${v.hanViet ? `<span class="han-viet">${v.hanViet}</span>` : ''}
                         </div>
-                        <div class="vocab-summary" id="vocab-summary-${v.id}">${preview}</div>
+                        ${preview ? `<div class="vocab-summary" id="vocab-summary-${v.id}">${preview}</div>` : ''}
                         <div class="vocab-content" id="vocab-content-${v.id}">
-                            ${isLong ? `<div style="margin-top:4px; font-size:0.93em; color:#2c3e50; line-height:1.6;">${v.meaning}</div>` : ''}
+                            ${isLong ? `<div style="margin-top:4px; font-size:0.93em; color:#2c3e50; line-height:1.6;">${meaning}</div>` : ''}
                         </div>
                         ${isLong ? `<button class="expand-btn" id="vocab-hint-${v.id}" onclick="toggleVocabContent(${v.id}, event)">Show more ▼</button>` : ''}
                     </div>
@@ -1461,12 +1474,12 @@
                     <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()" onclick="event.stopPropagation()">
                     <div style="flex: 1;">
                         <div class="grammar-title">${g.pattern}</div>
-                        <div class="grammar-summary" id="grammar-summary-${g.id}">${preview}</div>
+                        ${preview ? `<div class="grammar-summary" id="grammar-summary-${g.id}">${preview}</div>` : ''}
                         <div class="grammar-content" id="grammar-content-${g.id}">
                             ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
-                            <div class="grammar-example"><strong>Examples:</strong><br>${g.examples.replace(/\n/g, '<br>')}</div>
+                            ${g.examples ? `<div class="grammar-example"><strong>Examples:</strong><br>${g.examples.replace(/\n/g, '<br>')}</div>` : ''}
                         </div>
-                        <button class="expand-btn" id="grammar-hint-${g.id}" onclick="toggleGrammarContent(${g.id})">Show more ▼</button>
+                        ${preview ? `<button class="expand-btn" id="grammar-hint-${g.id}" onclick="toggleGrammarContent(${g.id})">Show more ▼</button>` : ''}
                     </div>
                     <div class="action-buttons" style="margin-top: 10px;">
                         <button class="edit-btn" onclick="editGrammar(${g.id})" title="Edit">
@@ -1847,9 +1860,15 @@
         function addPinyin(event) {
             event.preventDefault();
             
+            const pattern = document.getElementById('pinyinPattern').value.trim();
+            if (!pattern) {
+                alert('Please enter at least Pinyin Part');
+                return;
+            }
+            
             const pinyin = {
                 id: editingPinyinId || Date.now(),
-                pattern: document.getElementById('pinyinPattern').value,
+                pattern: pattern,
                 examples: document.getElementById('pinyinExamples').value,
                 notes: document.getElementById('pinyinNotes').value,
                 date: editingPinyinId ? pinyinData.find(p => p.id === editingPinyinId).date : new Date().toISOString()
@@ -1922,12 +1941,12 @@
                     <input type="checkbox" class="item-checkbox pinyin-checkbox" data-id="${p.id}" onchange="updatePinyinCount()" onclick="event.stopPropagation()">
                     <div style="flex: 1;">
                         <div class="pinyin-title">${p.pattern}</div>
-                        <div class="pinyin-summary" id="pinyin-summary-${p.id}">${preview}</div>
+                        ${preview ? `<div class="pinyin-summary" id="pinyin-summary-${p.id}">${preview}</div>` : ''}
                         <div class="pinyin-content" id="pinyin-content-${p.id}">
                             ${p.notes ? `<div class="pinyin-notes"><strong>Notes:</strong> ${p.notes}</div>` : ''}
-                            <div class="pinyin-example"><strong>Pronunciation:</strong><br>${p.examples.replace(/\n/g, '<br>')}</div>
+                            ${p.examples ? `<div class="pinyin-example"><strong>Pronunciation:</strong><br>${p.examples.replace(/\n/g, '<br>')}</div>` : ''}
                         </div>
-                        <button class="expand-btn" id="pinyin-hint-${p.id}" onclick="togglePinyinContent(${p.id})">Show more ▼</button>
+                        ${preview ? `<button class="expand-btn" id="pinyin-hint-${p.id}" onclick="togglePinyinContent(${p.id})">Show more ▼</button>` : ''}
                     </div>
                     <div class="action-buttons" style="margin-top: 10px;">
                         <button class="edit-btn" onclick="editPinyin(${p.id})" title="Edit">
