@@ -1474,15 +1474,18 @@
                 const notesPreview = g.notes ? (g.notes.length > 70 ? g.notes.substring(0,70) + '…' : g.notes) : '';
                 const exPreview = g.examples ? (g.examples.length > 70 ? g.examples.substring(0,70) + '…' : g.examples) : '';
                 const preview = notesPreview || exPreview;
+                const previewWithBreaks = preview.replace(/\n/g, '<br>');
+                const notesWithBreaks = g.notes ? g.notes.replace(/\n/g, '<br>') : '';
+                const examplesWithBreaks = g.examples ? g.examples.replace(/\n/g, '<br>') : '';
                 return `
                 <div class="grammar-item">
                     <input type="checkbox" class="item-checkbox grammar-checkbox" data-id="${g.id}" onchange="updateGrammarCount()" onclick="event.stopPropagation()">
                     <div style="flex: 1;">
                         <div class="grammar-title">${g.pattern}</div>
-                        ${preview ? `<div class="grammar-summary" id="grammar-summary-${g.id}">${preview}</div>` : ''}
+                        ${preview ? `<div class="grammar-summary" id="grammar-summary-${g.id}">${previewWithBreaks}</div>` : ''}
                         <div class="grammar-content" id="grammar-content-${g.id}">
-                            ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${g.notes}</div>` : ''}
-                            ${g.examples ? `<div class="grammar-example"><strong>Examples:</strong><br>${g.examples.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${g.notes ? `<div class="grammar-notes"><strong>Notes:</strong> ${notesWithBreaks}</div>` : ''}
+                            ${g.examples ? `<div class="grammar-example"><strong>Examples:</strong><br>${examplesWithBreaks}</div>` : ''}
                         </div>
                         ${preview ? `<button class="expand-btn" id="grammar-hint-${g.id}" onclick="toggleGrammarContent(${g.id})">Show more ▼</button>` : ''}
                     </div>
@@ -1618,19 +1621,23 @@
 
         // Print Vocabulary (only selected)
         async function printVocabPDF() {
-            // First, try to sync from Google Sheets to get latest data
+            // Check for selection BEFORE any sync operation
+            const initialCheckboxes = document.querySelectorAll('.vocab-checkbox:checked');
+            
+            if (initialCheckboxes.length === 0) {
+                alert('Please select at least one word to print!');
+                return;
+            }
+            
+            // Save selected IDs before sync
+            const selectedIds = Array.from(initialCheckboxes).map(cb => parseInt(cb.dataset.id));
+            
+            // Sync from Google Sheets to get latest data
             if (googleSheetsUrl) {
                 await syncFromGoogleSheetsSilent();
             }
             
-            const selectedCheckboxes = document.querySelectorAll('.vocab-checkbox:checked');
-            
-            if (selectedCheckboxes.length === 0) {
-                alert('Please select at least one word to print!');
-                return;
-            }
-
-            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.id));
+            // Filter vocab by saved IDs (no need to query checkboxes again)
             const selectedVocab = vocabData.filter(v => selectedIds.includes(v.id));
 
             // Create a printable HTML page
@@ -1742,19 +1749,23 @@
 
         // Print Grammar (only selected)
         async function printGrammarPDF() {
-            // First, try to sync from Google Sheets to get latest data
+            // Check for selection BEFORE any sync operation
+            const initialCheckboxes = document.querySelectorAll('.grammar-checkbox:checked');
+            
+            if (initialCheckboxes.length === 0) {
+                alert('Please select at least one grammar pattern to print!');
+                return;
+            }
+            
+            // Save selected IDs before sync
+            const selectedIds = Array.from(initialCheckboxes).map(cb => parseInt(cb.dataset.id));
+            
+            // Sync from Google Sheets to get latest data
             if (googleSheetsUrl) {
                 await syncFromGoogleSheetsSilent();
             }
             
-            const selectedCheckboxes = document.querySelectorAll('.grammar-checkbox:checked');
-            
-            if (selectedCheckboxes.length === 0) {
-                alert('Please select at least one grammar pattern to print!');
-                return;
-            }
-
-            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.id));
+            // Filter grammar by saved IDs
             const selectedGrammar = grammarData.filter(g => selectedIds.includes(g.id));
 
             // Create a printable HTML page
@@ -1841,8 +1852,8 @@
                             ${selectedGrammar.map(g => `
                                 <tr>
                                     <td class="pattern">${g.pattern}</td>
-                                    <td class="examples">${g.examples}</td>
-                                    <td>${g.notes || '-'}</td>
+                                    <td class="examples">${(g.examples || '').replace(/\n/g, '<br>')}</td>
+                                    <td>${(g.notes || '-').replace(/\n/g, '<br>')}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -1941,15 +1952,18 @@
                 const notesPreview = p.notes ? (p.notes.length > 70 ? p.notes.substring(0,70) + '…' : p.notes) : '';
                 const exPreview = p.examples ? (p.examples.length > 70 ? p.examples.substring(0,70) + '…' : p.examples) : '';
                 const preview = notesPreview || exPreview;
+                const previewWithBreaks = preview.replace(/\n/g, '<br>');
+                const notesWithBreaks = p.notes ? p.notes.replace(/\n/g, '<br>') : '';
+                const examplesWithBreaks = p.examples ? p.examples.replace(/\n/g, '<br>') : '';
                 return `
                 <div class="pinyin-item">
                     <input type="checkbox" class="item-checkbox pinyin-checkbox" data-id="${p.id}" onchange="updatePinyinCount()" onclick="event.stopPropagation()">
                     <div style="flex: 1;">
                         <div class="pinyin-title">${p.pattern}</div>
-                        ${preview ? `<div class="pinyin-summary" id="pinyin-summary-${p.id}">${preview}</div>` : ''}
+                        ${preview ? `<div class="pinyin-summary" id="pinyin-summary-${p.id}">${previewWithBreaks}</div>` : ''}
                         <div class="pinyin-content" id="pinyin-content-${p.id}">
-                            ${p.notes ? `<div class="pinyin-notes"><strong>Notes:</strong> ${p.notes}</div>` : ''}
-                            ${p.examples ? `<div class="pinyin-example"><strong>Pronunciation:</strong><br>${p.examples.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${p.notes ? `<div class="pinyin-notes"><strong>Notes:</strong> ${notesWithBreaks}</div>` : ''}
+                            ${p.examples ? `<div class="pinyin-example"><strong>Pronunciation:</strong><br>${examplesWithBreaks}</div>` : ''}
                         </div>
                         ${preview ? `<button class="expand-btn" id="pinyin-hint-${p.id}" onclick="togglePinyinContent(${p.id})">Show more ▼</button>` : ''}
                     </div>
@@ -2020,18 +2034,23 @@
 
         // Print Pinyin (only selected)
         async function printPinyinPDF() {
+            // Check for selection BEFORE any sync operation
+            const initialCheckboxes = document.querySelectorAll('.pinyin-checkbox:checked');
+            
+            if (initialCheckboxes.length === 0) {
+                alert('Please select at least one pinyin to print!');
+                return;
+            }
+            
+            // Save selected IDs before sync
+            const selectedIds = Array.from(initialCheckboxes).map(cb => parseInt(cb.dataset.id));
+            
+            // Sync from Google Sheets to get latest data
             if (googleSheetsUrl) {
                 await syncFromGoogleSheetsSilent();
             }
             
-            const selectedCheckboxes = document.querySelectorAll('.pinyin-checkbox:checked');
-            
-            if (selectedCheckboxes.length === 0) {
-                alert('Please select at least one pinyin to print!');
-                return;
-            }
-
-            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.id));
+            // Filter pinyin by saved IDs
             const selectedPinyin = pinyinData.filter(p => selectedIds.includes(p.id));
 
             const printWindow = window.open('', '', 'width=800,height=600');
@@ -2088,9 +2107,9 @@
                     ${selectedPinyin.map(p => `
                         <div class="pinyin-item">
                             <div class="pattern">${p.pattern}</div>
-                            ${p.notes ? `<div class="label">Notes:</div><div class="content">${p.notes}</div>` : ''}
+                            ${p.notes ? `<div class="label">Notes:</div><div class="content">${p.notes.replace(/\n/g, '<br>')}</div>` : ''}
                             <div class="label">Pronunciation:</div>
-                            <div class="content">${p.examples}</div>
+                            <div class="content">${(p.examples || '').replace(/\n/g, '<br>')}</div>
                         </div>
                     `).join('')}
                 </body>
