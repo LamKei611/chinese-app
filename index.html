@@ -2254,9 +2254,9 @@ function doGet(e) {
                 // Import vocabulary
                 if (data.vocab && data.vocab.length > 0) {
                     data.vocab.forEach(item => {
-                        // Check if item already exists by matching hanzi and pinyin
+                        // Check if item already exists by matching hanzi only
                         const existingIndex = vocabData.findIndex(v => 
-                            v.hanzi === item.hanzi && v.pinyin === item.pinyin
+                            v.hanzi === item.hanzi
                         );
                         
                         if (existingIndex === -1) {
@@ -2264,20 +2264,21 @@ function doGet(e) {
                             vocabData.push({
                                 id: Date.now() + Math.random(),
                                 hanzi: item.hanzi,
-                                pinyin: item.pinyin,
+                                pinyin: item.pinyin || '',
                                 hanViet: item.hanViet || '',
-                                meaning: item.meaning,
-                                wordType: item.wordType,
+                                meaning: item.meaning || '',
+                                wordType: item.wordType || '',
                                 date: item.date || new Date().toISOString()
                             });
                             importedVocab++;
                         } else {
-                            // Update existing item
+                            // Update existing item with all new data from Sheets
                             vocabData[existingIndex] = {
                                 ...vocabData[existingIndex],
-                                hanViet: item.hanViet || vocabData[existingIndex].hanViet,
-                                meaning: item.meaning,
-                                wordType: item.wordType
+                                pinyin: item.pinyin || vocabData[existingIndex].pinyin || '',
+                                hanViet: item.hanViet || vocabData[existingIndex].hanViet || '',
+                                meaning: item.meaning || vocabData[existingIndex].meaning || '',
+                                wordType: item.wordType || vocabData[existingIndex].wordType || ''
                             };
                         }
                     });
@@ -2296,17 +2297,17 @@ function doGet(e) {
                             grammarData.push({
                                 id: Date.now() + Math.random(),
                                 pattern: item.pattern,
-                                examples: item.examples,
+                                examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
                             });
                             importedGrammar++;
                         } else {
-                            // Update existing item
+                            // Update existing item with all new data from Sheets
                             grammarData[existingIndex] = {
                                 ...grammarData[existingIndex],
-                                examples: item.examples,
-                                notes: item.notes || grammarData[existingIndex].notes
+                                examples: item.examples || grammarData[existingIndex].examples || '',
+                                notes: item.notes || grammarData[existingIndex].notes || ''
                             };
                         }
                     });
@@ -2325,17 +2326,17 @@ function doGet(e) {
                             pinyinData.push({
                                 id: Date.now() + Math.random(),
                                 pattern: item.pattern,
-                                examples: item.examples,
+                                examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
                             });
                             importedPinyin++;
                         } else {
-                            // Update existing item
+                            // Update existing item with all new data from Sheets
                             pinyinData[existingIndex] = {
                                 ...pinyinData[existingIndex],
-                                examples: item.examples,
-                                notes: item.notes || pinyinData[existingIndex].notes
+                                examples: item.examples || pinyinData[existingIndex].examples || '',
+                                notes: item.notes || pinyinData[existingIndex].notes || ''
                             };
                         }
                     });
@@ -2370,25 +2371,26 @@ function doGet(e) {
                 if (data.vocab && data.vocab.length > 0) {
                     data.vocab.forEach(item => {
                         const existingIndex = vocabData.findIndex(v => 
-                            v.hanzi === item.hanzi && v.pinyin === item.pinyin
+                            v.hanzi === item.hanzi
                         );
                         
                         if (existingIndex === -1) {
                             vocabData.push({
                                 id: Date.now() + Math.random(),
                                 hanzi: item.hanzi,
-                                pinyin: item.pinyin,
+                                pinyin: item.pinyin || '',
                                 hanViet: item.hanViet || '',
-                                meaning: item.meaning,
-                                wordType: item.wordType,
+                                meaning: item.meaning || '',
+                                wordType: item.wordType || '',
                                 date: item.date || new Date().toISOString()
                             });
                         } else {
                             vocabData[existingIndex] = {
                                 ...vocabData[existingIndex],
-                                hanViet: item.hanViet || vocabData[existingIndex].hanViet,
-                                meaning: item.meaning,
-                                wordType: item.wordType
+                                pinyin: item.pinyin || vocabData[existingIndex].pinyin || '',
+                                hanViet: item.hanViet || vocabData[existingIndex].hanViet || '',
+                                meaning: item.meaning || vocabData[existingIndex].meaning || '',
+                                wordType: item.wordType || vocabData[existingIndex].wordType || ''
                             };
                         }
                     });
@@ -2405,15 +2407,15 @@ function doGet(e) {
                             grammarData.push({
                                 id: Date.now() + Math.random(),
                                 pattern: item.pattern,
-                                examples: item.examples,
+                                examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
                             });
                         } else {
                             grammarData[existingIndex] = {
                                 ...grammarData[existingIndex],
-                                examples: item.examples,
-                                notes: item.notes || grammarData[existingIndex].notes
+                                examples: item.examples || grammarData[existingIndex].examples || '',
+                                notes: item.notes || grammarData[existingIndex].notes || ''
                             };
                         }
                     });
@@ -2430,15 +2432,15 @@ function doGet(e) {
                             pinyinData.push({
                                 id: Date.now() + Math.random(),
                                 pattern: item.pattern,
-                                examples: item.examples,
+                                examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
                             });
                         } else {
                             pinyinData[existingIndex] = {
                                 ...pinyinData[existingIndex],
-                                examples: item.examples,
-                                notes: item.notes || pinyinData[existingIndex].notes
+                                examples: item.examples || pinyinData[existingIndex].examples || '',
+                                notes: item.notes || pinyinData[existingIndex].notes || ''
                             };
                         }
                     });
