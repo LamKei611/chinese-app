@@ -2254,16 +2254,20 @@ function doGet(e) {
                 // Import vocabulary
                 if (data.vocab && data.vocab.length > 0) {
                     data.vocab.forEach(item => {
+                        // Normalize and trim hanzi for reliable matching
+                        const itemHanzi = (item.hanzi || '').trim().normalize('NFC');
+                        
                         // Check if item already exists by matching hanzi only
                         const existingIndex = vocabData.findIndex(v => 
-                            v.hanzi === item.hanzi
+                            (v.hanzi || '').trim().normalize('NFC') === itemHanzi
                         );
                         
                         if (existingIndex === -1) {
                             // Add new item with unique ID
+                            console.log('➕ Adding new vocab:', itemHanzi);
                             vocabData.push({
                                 id: Date.now() + Math.random(),
-                                hanzi: item.hanzi,
+                                hanzi: itemHanzi,
                                 pinyin: item.pinyin || '',
                                 hanViet: item.hanViet || '',
                                 meaning: item.meaning || '',
@@ -2273,6 +2277,7 @@ function doGet(e) {
                             importedVocab++;
                         } else {
                             // Update existing item with all new data from Sheets
+                            console.log('🔄 Updating existing vocab:', itemHanzi, '- pinyin:', item.pinyin);
                             vocabData[existingIndex] = {
                                 ...vocabData[existingIndex],
                                 pinyin: item.pinyin || vocabData[existingIndex].pinyin || '',
@@ -2287,16 +2292,19 @@ function doGet(e) {
                 // Import grammar
                 if (data.grammar && data.grammar.length > 0) {
                     data.grammar.forEach(item => {
+                        // Normalize and trim pattern for reliable matching
+                        const itemPattern = (item.pattern || '').trim().normalize('NFC');
+                        
                         // Check if item already exists by pattern
                         const existingIndex = grammarData.findIndex(g => 
-                            g.pattern === item.pattern
+                            (g.pattern || '').trim().normalize('NFC') === itemPattern
                         );
                         
                         if (existingIndex === -1) {
                             // Add new item with unique ID
                             grammarData.push({
                                 id: Date.now() + Math.random(),
-                                pattern: item.pattern,
+                                pattern: itemPattern,
                                 examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
@@ -2316,16 +2324,19 @@ function doGet(e) {
                 // Import pinyin
                 if (data.pinyin && data.pinyin.length > 0) {
                     data.pinyin.forEach(item => {
+                        // Normalize and trim pattern for reliable matching
+                        const itemPattern = (item.pattern || '').trim().normalize('NFC');
+                        
                         // Check if item already exists by pattern
                         const existingIndex = pinyinData.findIndex(p => 
-                            p.pattern === item.pattern
+                            (p.pattern || '').trim().normalize('NFC') === itemPattern
                         );
                         
                         if (existingIndex === -1) {
                             // Add new item with unique ID
                             pinyinData.push({
                                 id: Date.now() + Math.random(),
-                                pattern: item.pattern,
+                                pattern: itemPattern,
                                 examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
@@ -2370,14 +2381,15 @@ function doGet(e) {
                 // Import vocabulary
                 if (data.vocab && data.vocab.length > 0) {
                     data.vocab.forEach(item => {
+                        const itemHanzi = (item.hanzi || '').trim().normalize('NFC');
                         const existingIndex = vocabData.findIndex(v => 
-                            v.hanzi === item.hanzi
+                            (v.hanzi || '').trim().normalize('NFC') === itemHanzi
                         );
                         
                         if (existingIndex === -1) {
                             vocabData.push({
                                 id: Date.now() + Math.random(),
-                                hanzi: item.hanzi,
+                                hanzi: itemHanzi,
                                 pinyin: item.pinyin || '',
                                 hanViet: item.hanViet || '',
                                 meaning: item.meaning || '',
@@ -2399,14 +2411,15 @@ function doGet(e) {
                 // Import grammar
                 if (data.grammar && data.grammar.length > 0) {
                     data.grammar.forEach(item => {
+                        const itemPattern = (item.pattern || '').trim().normalize('NFC');
                         const existingIndex = grammarData.findIndex(g => 
-                            g.pattern === item.pattern
+                            (g.pattern || '').trim().normalize('NFC') === itemPattern
                         );
                         
                         if (existingIndex === -1) {
                             grammarData.push({
                                 id: Date.now() + Math.random(),
-                                pattern: item.pattern,
+                                pattern: itemPattern,
                                 examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
@@ -2424,14 +2437,15 @@ function doGet(e) {
                 // Import pinyin
                 if (data.pinyin && data.pinyin.length > 0) {
                     data.pinyin.forEach(item => {
+                        const itemPattern = (item.pattern || '').trim().normalize('NFC');
                         const existingIndex = pinyinData.findIndex(p => 
-                            p.pattern === item.pattern
+                            (p.pattern || '').trim().normalize('NFC') === itemPattern
                         );
                         
                         if (existingIndex === -1) {
                             pinyinData.push({
                                 id: Date.now() + Math.random(),
-                                pattern: item.pattern,
+                                pattern: itemPattern,
                                 examples: item.examples || '',
                                 notes: item.notes || '',
                                 date: item.date || new Date().toISOString()
